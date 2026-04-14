@@ -9,10 +9,9 @@ const PAGE_SIZE = 20;
 
 function StockListPage() {
   const [keyword, setKeyword] = useState("");
-  const [searchKeyword, setSearchKeyword] = useState("");
   const [message, setMessage] = useState("");
   const [currentPage, setCurrentPage] = useState(0);
-
+  const [filterdStockData, setFilterdStockData] = useState([]);
   const [stockData, setStockData] = useState({
     totalCount: 0,
     page: 0,
@@ -23,18 +22,20 @@ function StockListPage() {
     items: [],
   });
 
+
   useEffect(() => {
     loadStocks(0, "");
   }, []);
 
   useEffect(() => {
-    loadStocks(currentPage, searchKeyword);
-  }, [currentPage, searchKeyword]);
+    loadStocks(currentPage);
+  }, [currentPage]);
 
-  async function loadStocks(page, keywordValue) {
+  async function loadStocks(page) {
     try {
-      const res = await fetchStocks(page, PAGE_SIZE, keywordValue);
+      const res = await fetchStocks(page, PAGE_SIZE);
       setStockData(res.data);
+      setFilterdStockData(res.data.items);
       setMessage("");
     } catch (error) {
       console.error("fetchStocks error:", error);
@@ -51,9 +52,17 @@ function StockListPage() {
     }
   }
 
-  function handleSearch() {
-    setCurrentPage(0);
-    setSearchKeyword(keyword.trim());
+  function filterList(e) {
+    let keywordValue = e.target.value;
+    setKeyword(keywordValue);
+    keywordValue = keywordValue.toUpperCase();
+    setFilterdStockData(
+      stockData.items.filter(
+        (item) =>
+          (item.tickerCode ?? "").includes(keywordValue) ||
+          (item.stockName.toUpperCase() ?? "").includes(keywordValue)
+      ) ?? []
+    );
   }
 
   async function handleToggleFavorite(tickerCode, isFavorite) {
@@ -64,7 +73,7 @@ function StockListPage() {
         await addFavorite(tickerCode);
       }
 
-      await loadStocks(currentPage, searchKeyword);
+      await loadStocks(currentPage);
     } catch (error) {
       console.error("favorite error:", error);
       setMessage(error.message || "処理に失敗しました。");
@@ -84,22 +93,15 @@ function StockListPage() {
             className="stock-search-input"
             placeholder="銘柄コードまたは銘柄名"
             value={keyword}
-            onChange={(e) => setKeyword(e.target.value)}
+            onChange={filterList}
           />
-          <button
-            type="button"
-            className="stock-search-button"
-            onClick={handleSearch}
-          >
-            検索
-          </button>
         </div>
 
         <StockListTable
           title="銘柄一覧"
           currentCount={stockData.currentFavoriteCount}
           maxCount={stockData.maxFavoriteCount}
-          items={stockData.items}
+          items={filterdStockData}
           onToggleFavorite={handleToggleFavorite}
           fromPath="/stocks"
         />

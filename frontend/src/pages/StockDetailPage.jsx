@@ -129,13 +129,21 @@ function buildPriceChart(points, width, height, chartType) {
   const displayMax = maxValue + range * 0.08;
   const displayRange = displayMax - displayMin || 1;
 
-  const xStart = padding.left + 22;
-  const xEnd = width - padding.right - 22;
-  const usableWidth = xEnd - xStart;
+  const baseUsableWidth = width - padding.left - padding.right;
+  const bodyWidth = Math.max(
+    8,
+    Math.min(18, baseUsableWidth / Math.max(points.length * 2.8, 8))
+  );
 
+  const xStart = padding.left;
+  const xEnd = width - padding.right;
+  const usableWidth = xEnd - xStart;
+  
   const getX = (index) => {
     if (points.length === 1) return xStart + usableWidth / 2;
-    return xStart + (usableWidth * index) / (points.length - 1);
+
+    const step = usableWidth / points.length;
+    return xStart + step * index + step / 2;
   };
 
   const getY = (value) =>
@@ -150,11 +158,6 @@ function buildPriceChart(points, width, height, chartType) {
   const linePoints = points
     .map((p, i) => `${getX(i)},${getY(p.closePrice)}`)
     .join(" ");
-
-  const bodyWidth = Math.max(
-    8,
-    Math.min(18, usableWidth / Math.max(points.length * 2.8, 8))
-  );
 
   return {
     padding,
@@ -188,9 +191,16 @@ function buildMaChart(points, width, height) {
   const displayMax = maxValue + range * 0.1;
   const displayRange = displayMax - displayMin || 1;
 
+  const edgePadding = plotWidth * 0.03;
+  const innerWidth = plotWidth - edgePadding * 2;
+
   const getX = (index) => {
-    if (points.length === 1) return padding.left + plotWidth / 2;
-    return padding.left + (plotWidth * index) / (points.length - 1);
+    if (points.length === 1) {
+      return padding.left + plotWidth / 2;
+    }
+
+    const step = innerWidth / (points.length - 1);
+    return padding.left + edgePadding + step * index;
   };
 
   const getY = (value) =>
@@ -319,7 +329,8 @@ function PriceTrendChart({ data, chartType }) {
               />
             </g>
           );
-        })}
+        })
+      }
 
       {data.map((point, index) => {
         const today = new Date().toISOString().slice(0, 10);

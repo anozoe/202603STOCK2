@@ -5,17 +5,17 @@ import lombok.RequiredArgsConstructor;
 
 @Getter
 @RequiredArgsConstructor
-public enum DayType {
-    FRIDAY("金曜", 1),
-    OTHER("それ以外", 2);
+public enum CHART_TYPE {
+    LINE("折れ線", 1),
+    CANDLE("ローソク", 2);
 
     private final String label;
     private final int code;
-
-    public static DayType getByCode(int code) {
-        for( DayType type : DayType.values() ) {
+    
+    public static CHART_TYPE getByCode(int code) {
+        for( CHART_TYPE type : CHART_TYPE.values() ) {
             if ( type.getCode() == code) {
-                return type;
+                return type;        
             }
         }
         return null;

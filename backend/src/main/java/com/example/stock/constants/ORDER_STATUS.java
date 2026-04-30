@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 
 @Getter
 @RequiredArgsConstructor
-public enum OrderStatus {
+public enum ORDER_STATUS {
     UNEXECUTED("未約定", 1),
     EXECUTED("約定済", 2),
     CANCEL("キャンセル", 3);
@@ -13,8 +13,8 @@ public enum OrderStatus {
     private final String label;
     private final int code;
 
-    public static OrderStatus getByCode(int code) {
-        for( OrderStatus status : OrderStatus.values() ) {
+    public static ORDER_STATUS getByCode(int code) {
+        for( ORDER_STATUS status : ORDER_STATUS.values() ) {
             if ( status.getCode() == code) {
                 return status;
             }

@@ -1,6 +1,9 @@
 package com.example.stock.constants;
 
+import lombok.Getter;
 
+@Getter
+@
 public enum OrderSide {
     BUY("買い", 1),
     SELL("売り", 2);

@@ -1,24 +1,16 @@
 package com.example.stock.constants;
 
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+
+@Getter
+@RequiredArgsConstructor
 public enum DayType {
     FRIDAY("金曜", 1),
     OTHER("それ以外", 2);
 
-    private String label;
-    private int code;
-
-    private DayType(String label, int code){
-        this.label = label;
-        this.code = code;
-    }
-
-    public String getLabel() {
-        return label;
-    }
-
-    public int getCode() {
-        return code;
-    }
+    private final String label;
+    private final int code;
 
     public static DayType getByCode(int code) {
         for( DayType type : DayType.values() ) {

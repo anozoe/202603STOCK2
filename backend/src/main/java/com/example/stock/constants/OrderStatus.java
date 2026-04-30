@@ -1,25 +1,17 @@
 package com.example.stock.constants;
 
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+
+@Getter
+@RequiredArgsConstructor
 public enum OrderStatus {
     UNEXECUTED("未約定", 1),
     EXECUTED("約定済", 2),
     CANCEL("キャンセル", 3);
 
-    private String label;
-    private int code;
-    
-    private OrderStatus(String label, int code){
-        this.label = label;
-        this.code = code;
-    }
-
-    public String getLabel() {
-        return label;
-    }
-
-    public int getCode() {
-        return code;
-    }
+    private final String label;
+    private final int code;
 
     public static OrderStatus getByCode(int code) {
         for( OrderStatus status : OrderStatus.values() ) {

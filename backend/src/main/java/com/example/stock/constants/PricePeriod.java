@@ -1,14 +1,13 @@
 package com.example.stock.constants;
 
-public enum RoleCode {
-
-    GENERAL_USER("一般ユーザ", 1),
-    ADMIN("管理者", 2);
+public enum PricePeriod {
+    DAY("1日", 1),
+    WEEK("1週間", 2);
 
     private String label;
     private int code;
-
-    private RoleCode(String label, int code) {
+    
+    private PricePeriod(String label, int code){
         this.label = label;
         this.code = code;
     }
@@ -21,10 +20,10 @@ public enum RoleCode {
         return code;
     }
 
-    public static RoleCode getByCode(int code) {
-        for( RoleCode role : RoleCode.values() ) {
-            if ( role.getCode() == code) {
-                return role;
+    public static PricePeriod getByCode(int code) {
+        for( PricePeriod period : PricePeriod.values() ) {
+            if ( period.getCode() == code) {
+                return period;
             }
         }
         return null;

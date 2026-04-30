@@ -1,32 +1,10 @@
 package com.example.stock.constants;
 
-public enum RoleCode {
+public final class RoleCode {
 
-    GENERAL_USER("一般ユーザ", 1),
-    ADMIN("管理者", 2);
-
-    private String label;
-    private int code;
-
-    private RoleCode(String label, int code) {
-        this.label = label;
-        this.code = code;
+    private RoleCode() {
     }
 
-    public String getLabel() {
-        return label;
-    }
-
-    public int getCode() {
-        return code;
-    }
-
-    public static RoleCode getByCode(int code) {
-        for( RoleCode role : RoleCode.values() ) {
-            if ( role.getCode() == code) {
-                return role;
-            }
-        }
-        return null;
-    }
+    public static final int GENERAL_USER = 1;
+    public static final int ADMIN = 2;
 }

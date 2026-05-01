@@ -1,15 +1,13 @@
 package com.example.stock.repository;
 
-import com.example.stock.entity.Stock;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import java.util.List;
-import java.util.Optional;
+import com.example.stock.entity.Stock;
 
-public interface StockRepository extends JpaRepository<Stock, Long> {
-
+public interface StockInfoRepository extends JpaRepository<StockInfoRepository, Integer>{
+    
+    //TODO: エラー修正
+    //TODO:stock→stock_info変更
     Optional<Stock> findByTickerCode(String tickerCode);
 
     Optional<Stock> findTopByOrderByDisplayOrderDesc();

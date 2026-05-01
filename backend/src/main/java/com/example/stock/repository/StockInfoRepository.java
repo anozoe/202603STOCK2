@@ -1,24 +1,26 @@
 package com.example.stock.repository;
 
+import com.example.stock.entity.StockInfo;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import com.example.stock.entity.Stock;
+import java.util.List;
+import java.util.Optional;
 
-public interface StockInfoRepository extends JpaRepository<StockInfoRepository, Integer>{
-    
-    //TODO: エラー修正
-    //TODO:stock→stock_info変更
-    Optional<Stock> findByTickerCode(String tickerCode);
+public interface StockRepository extends JpaRepository<StockInfo, Long> {
 
-    Optional<Stock> findTopByOrderByDisplayOrderDesc();
+    Optional<StockInfo> findByTickerCode(String tickerCode);
 
-    List<Stock> findByIdIn(List<Long> ids);
+    Optional<StockInfo> findTopByOrderByDisplayOrderDesc();
+
+    List<StockInfo> findByIdIn(List<Long> ids);
 
     boolean existsByTickerCodeAndIdNot(String tickerCode, Long id);
 
-    Page<Stock> findAllByOrderByDisplayOrderAscIdAsc(Pageable pageable);
+    Page<StockInfo> findAllByOrderByDisplayOrderAscIdAsc(Pageable pageable);
 
-    Page<Stock> findByTickerCodeContainingIgnoreCaseOrStockNameContainingIgnoreCaseOrderByDisplayOrderAscIdAsc(
+    Page<StockInfo> findByTickerCodeContainingIgnoreCaseOrStockNameContainingIgnoreCaseOrderByDisplayOrderAscIdAsc(
             String tickerCodeKeyword,
             String stockNameKeyword,
             Pageable pageable

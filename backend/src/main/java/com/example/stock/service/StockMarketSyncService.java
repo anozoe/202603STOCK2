@@ -2,7 +2,7 @@ package com.example.stock.service;
 
 import com.example.stock.constants.MarketCode;
 import com.example.stock.dto.*;
-import com.example.stock.entity.Stock;
+import com.example.stock.entity.StockInfo;
 import com.example.stock.entity.StockPriceHistory;
 import com.example.stock.exception.BusinessException;
 import com.example.stock.repository.StockPriceHistoryRepository;
@@ -28,7 +28,7 @@ public class StockMarketSyncService {
     private final StockMetricCalculator stockMetricCalculator;
 
     @Transactional
-    public Stock syncByTicker(String tickerCode, Integer displayOrder) {
+    public StockInfo syncByTicker(String tickerCode, Integer displayOrder) {
         String normalizedTicker = tickerCode == null ? "" : tickerCode.trim().toUpperCase();
 
         TwelveDataQuoteResponse quote;
@@ -43,8 +43,8 @@ public class StockMarketSyncService {
             throw new BusinessException("E002", "銘柄コード");
         }
 
-        Stock stock = stockRepository.findByTickerCode(normalizedTicker)
-                .orElseGet(Stock::new);
+        StockInfo stock = stockRepository.findByTickerCode(normalizedTicker)
+                .orElseGet(StockInfo::new);
 
         FmpMarketCapResponse marketCap = safeFetchMarketCap(normalizedTicker);
         FmpIncomeStatementTtmResponse incomeTtm = safeFetchIncomeStatementTtm(normalizedTicker);
@@ -109,7 +109,7 @@ public class StockMarketSyncService {
             stock.setDisplayOrder(nextOrder);
         }
 
-        Stock saved = stockRepository.save(stock);
+        StockInfo saved = stockRepository.save(stock);
 
         try {
             TwelveDataTimeSeriesResponse timeSeries = twelveDataClient.fetchDailyTimeSeries(normalizedTicker, 30);
@@ -166,7 +166,7 @@ public class StockMarketSyncService {
         }
     }
 
-    private void replacePriceHistories(Stock stock, TwelveDataTimeSeriesResponse response) {
+    private void replacePriceHistories(StockInfo stock, TwelveDataTimeSeriesResponse response) {
         if (response == null || response.getValues() == null || response.getValues().isEmpty()) {
             return;
         }

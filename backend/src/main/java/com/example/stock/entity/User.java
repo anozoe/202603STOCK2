@@ -26,17 +26,11 @@ public class User {
     @Column(name = "role", nullable = false)
     private Integer role;
 
-    @Column(name = "created_at")
+    @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
     @Column(name = "created_by")
     private String createdBy;
-
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
-
-    @Column(name = "updated_by")
-    private String updatedBy;
 
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;

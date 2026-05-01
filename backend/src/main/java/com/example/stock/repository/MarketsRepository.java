@@ -12,5 +12,7 @@ public interface MarketsRepository extends JpaRepository<MarketsRepository, Inte
     //TODO: 管理者銘柄情報取得API
     //TODO: 始値設定API
     //TODO: 株価変動API
+    //TODO: 仮想市場取得API
+    //TODO: 約定情報取得API_現在値を取得
     
 }

@@ -42,7 +42,7 @@ public class AssetsStock {
     private BigDecimal marketValue;
     
     @Column(name = "holding_amount", nullable = false)
-    private Integer holdingAmount = 0;
+    private Integer holdingAmount;
 
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;

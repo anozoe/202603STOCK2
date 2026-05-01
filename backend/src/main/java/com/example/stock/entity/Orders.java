@@ -48,7 +48,7 @@ public class Orders {
     private LocalDateTime executedAt;
     
     @Column(name = "order_execution_status", nullable = false)
-    private Integer orderExecutionStatus = 1;
+    private Integer orderExecutionStatus;
     
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;

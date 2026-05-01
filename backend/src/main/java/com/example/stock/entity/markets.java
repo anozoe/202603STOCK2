@@ -35,13 +35,27 @@ public class markets {
     @Column(name = "previous_close", nullable = false, precision = 10, scale = 2)
     private BigDecimal previousClose;
 
-    
-    private BigDecimal open_price;
-    private BigDecimal high_price;
-    private BigDecimal low_price;
-    private BigDecimal finish_price;
-    private BigDecimal price_change;
+    @Column(name = "open_price", nullable = false, precision = 10, scale = 2)
+    private BigDecimal openPrice;
+
+    @Column(name = "high_price", nullable = false, precision = 10, scale = 2)
+    private BigDecimal highPrice;
+
+    @Column(name = "low_price", nullable = false, precision = 10, scale = 2)
+    private BigDecimal lowPrice;
+
+    @Column(name = "finishi_price", precision = 10, scale = 2)
+    private BigDecimal finishPrice;
+
+    @Column(name = "price_change", precision = 10, scale = 2)
+    private BigDecimal priceChange;
+
+    @Column(name = "change_rate", precision = 3, scale = 2)
     private BigDecimal change_rate;
-    private LocalDateTime updated_at;
-    private LocalDateTime created_at;
+
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
+
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
 }

@@ -14,7 +14,7 @@ import lombok.Data;
 @Data
 @Entity
 @Table(name = "markets")
-public class markets {
+public class Markets {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -44,18 +44,18 @@ public class markets {
     @Column(name = "low_price", nullable = false, precision = 10, scale = 2)
     private BigDecimal lowPrice;
 
-    @Column(name = "finishi_price", precision = 10, scale = 2)
+    @Column(name = "finish_price", precision = 10, scale = 2)
     private BigDecimal finishPrice;
 
     @Column(name = "price_change", precision = 10, scale = 2)
     private BigDecimal priceChange;
 
-    @Column(name = "change_rate", precision = 3, scale = 2)
-    private BigDecimal change_rate;
+    @Column(name = "change_rate", precision = 5, scale = 2)
+    private BigDecimal changeRate;
 
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    @Column(name = "created_at")
+    @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 }

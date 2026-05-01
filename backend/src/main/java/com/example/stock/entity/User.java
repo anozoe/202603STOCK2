@@ -24,9 +24,9 @@ public class User {
     private String password;
 
     @Column(name = "role", nullable = false)
-    private Integer role;
+    private Integer role = 1;
 
-    @Column(name = "created_at")
+    @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
     @Column(name = "created_by")

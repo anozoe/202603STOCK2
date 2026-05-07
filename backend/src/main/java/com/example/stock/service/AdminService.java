@@ -8,7 +8,7 @@ import com.example.stock.dto.AdminStockReorderRequest;
 import com.example.stock.dto.AdminStockUpsertRequest;
 import com.example.stock.dto.AdminUserListResponse;
 import com.example.stock.dto.UserInfoResponse;
-import com.example.stock.entity.StockInfo;
+import com.example.stock.entity.Stock;
 import com.example.stock.entity.User;
 import com.example.stock.exception.BusinessException;
 import com.example.stock.repository.StockPriceHistoryRepository;
@@ -41,7 +41,7 @@ public class AdminService {
     public AdminStockListResponse getStocks(int page, int size) {
         int pageIndex = Math.max(page, 0);
 
-        Page<StockInfo> result = stockRepository.findAllByOrderByDisplayOrderAscIdAsc(
+        Page<Stock> result = stockRepository.findAllByOrderByDisplayOrderAscIdAsc(
                 PageRequest.of(pageIndex, size)
         );
 
@@ -84,7 +84,7 @@ public class AdminService {
             throw new BusinessException("E001", "ID");
         }
 
-        StockInfo existing = stockRepository.findById(req.getId())
+        Stock existing = stockRepository.findById(req.getId())
                 .orElseThrow(() -> new BusinessException("E010", "銘柄"));
 
         String tickerCode = req.getTickerCode().trim().toUpperCase();
@@ -98,7 +98,7 @@ public class AdminService {
 
     @Transactional
     public void deleteStock(Long id) {
-        StockInfo stock = stockRepository.findById(id)
+        Stock stock = stockRepository.findById(id)
                 .orElseThrow(() -> new BusinessException("E010", "銘柄"));
 
         userFavoriteRepository.deleteByStockId(stock.getId());
@@ -118,14 +118,14 @@ public void reorder(AdminStockReorderRequest req) {
     System.out.println("reorder start");
     System.out.println("stockIds = " + stockIds);
 
-    List<StockInfo> stocks = stockRepository.findAllById(stockIds);
+    List<Stock> stocks = stockRepository.findAllById(stockIds);
     System.out.println("stocks.size = " + stocks.size());
-    System.out.println("stocks ids = " + stocks.stream().map(StockInfo::getId).toList());
+    System.out.println("stocks ids = " + stocks.stream().map(Stock::getId).toList());
 
     if (stocks.size() != stockIds.size()) {
         throw new IllegalStateException(
                 "取得した銘柄件数が一致しません。 request=" + stockIds
-                        + ", actual=" + stocks.stream().map(StockInfo::getId).toList()
+                        + ", actual=" + stocks.stream().map(Stock::getId).toList()
         );
     }
 
@@ -135,7 +135,7 @@ public void reorder(AdminStockReorderRequest req) {
     }
     System.out.println("orderMap = " + orderMap);
 
-    for (StockInfo stock : stocks) {
+    for (Stock stock : stocks) {
         Integer displayOrder = orderMap.get(stock.getId());
         if (displayOrder == null) {
             throw new IllegalStateException("displayOrder が見つかりません。 stockId=" + stock.getId());
@@ -173,14 +173,14 @@ public void reorder(AdminStockReorderRequest req) {
     }
 
     private void normalizeDisplayOrder() {
-        List<StockInfo> allStocks = stockRepository.findAll().stream()
+        List<Stock> allStocks = stockRepository.findAll().stream()
                 .sorted(Comparator
-                        .comparing((StockInfo s) -> s.getDisplayOrder() == null ? Integer.MAX_VALUE : s.getDisplayOrder())
-                        .thenComparing(StockInfo::getId))
+                        .comparing((Stock s) -> s.getDisplayOrder() == null ? Integer.MAX_VALUE : s.getDisplayOrder())
+                        .thenComparing(Stock::getId))
                 .toList();
 
         int order = 1;
-        for (StockInfo stock : allStocks) {
+        for (Stock stock : allStocks) {
             stock.setDisplayOrder(order++);
         }
         stockRepository.saveAll(allStocks);

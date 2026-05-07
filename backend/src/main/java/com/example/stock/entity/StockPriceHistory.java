@@ -23,7 +23,7 @@ public class StockPriceHistory {
 
     @JoinColumn(name = "stock_id", nullable = false)
     @ManyToOne(fetch = FetchType.LAZY)
-    private StockInfo stock;
+    private Stock stock;
 
     @Column(name = "price_date", nullable = false)
     private LocalDate priceDate;

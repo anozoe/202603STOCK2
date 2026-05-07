@@ -8,7 +8,7 @@ import com.example.stock.dto.StockDetailResponse;
 import com.example.stock.dto.StockListItemResponse;
 import com.example.stock.dto.StockListResponse;
 import com.example.stock.dto.StockOverviewResponse;
-import com.example.stock.entity.StockInfo;
+import com.example.stock.entity.Stock;
 import com.example.stock.entity.StockPriceHistory;
 import com.example.stock.entity.User;
 import com.example.stock.entity.UserFavorite;
@@ -46,7 +46,7 @@ public class StockService {
         int pageIndex = Math.max(page, 0);
         String trimmedKeyword = keyword == null ? "" : keyword.trim();
 
-        Page<StockInfo> result;
+        Page<Stock> result;
         if (trimmedKeyword.isEmpty()) {
             result = stockRepository.findAllByOrderByDisplayOrderAscIdAsc(
                     PageRequest.of(pageIndex, size)
@@ -105,8 +105,8 @@ public class StockService {
         List<StockListItemResponse> items = result.getContent().stream()
                 .map(UserFavorite::getStock)
                 .sorted(Comparator
-                        .comparing((StockInfo s) -> s.getDisplayOrder() == null ? Integer.MAX_VALUE : s.getDisplayOrder())
-                        .thenComparing(StockInfo::getId))
+                        .comparing((Stock s) -> s.getDisplayOrder() == null ? Integer.MAX_VALUE : s.getDisplayOrder())
+                        .thenComparing(Stock::getId))
                 .map(stock -> new StockListItemResponse(
                         stock.getTickerCode(),
                         stock.getStockName(),
@@ -132,7 +132,7 @@ public class StockService {
 
     @Transactional(readOnly = true)
     public StockDetailResponse getStockDetail(String tickerCode) {
-        StockInfo stock = stockRepository.findByTickerCode(tickerCode)
+        Stock stock = stockRepository.findByTickerCode(tickerCode)
                 .orElseThrow(() -> new BusinessException("E010", "銘柄"));
 
         StockOverviewResponse overview = new StockOverviewResponse(
@@ -175,7 +175,7 @@ public class StockService {
     public FavoriteToggleResponse addFavorite(String tickerCode) {
         Long currentUserId = currentUserService.getCurrentUserId();
 
-        StockInfo stock = stockRepository.findByTickerCode(tickerCode)
+        Stock stock = stockRepository.findByTickerCode(tickerCode)
                 .orElseThrow(() -> new BusinessException("E010", "銘柄"));
 
         int currentFavoriteCount = userFavoriteRepository.countByUserId(currentUserId);
@@ -207,7 +207,7 @@ public class StockService {
     public FavoriteToggleResponse removeFavorite(String tickerCode) {
         Long currentUserId = currentUserService.getCurrentUserId();
 
-        StockInfo stock = stockRepository.findByTickerCode(tickerCode)
+        Stock stock = stockRepository.findByTickerCode(tickerCode)
                 .orElseThrow(() -> new BusinessException("E010", "銘柄"));
 
         boolean exists = userFavoriteRepository.existsByUserIdAndStockId(

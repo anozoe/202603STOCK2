@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 
 import com.example.stock.batch.dto.ExecutionInfoResponse;
-import com.example.stock.batch.service.ExecutionCheckService;
+import com.example.stock.batch.service.ExecutionInfoService;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,11 +19,10 @@ import org.springframework.web.bind.annotation.GetMapping;
 @RequiredArgsConstructor
 public class BatchController {
 
-    private final ExecutionCheckService executionCheckService;
-
+    private final ExecutionInfoService executionInfoService;
     @GetMapping("/execution-info")
     public List<ExecutionInfoResponse> getExecutionInfo(){
-        return executionCheckService.getExecutionInfo();
+        return executionInfoService.getExecutionInfo();
     }
     
 }

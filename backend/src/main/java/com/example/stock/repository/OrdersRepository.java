@@ -35,8 +35,7 @@ public interface OrdersRepository extends JpaRepository<Orders, Integer>{
             t.unrealized_pnl_ratio, 
             m.current_price
         FROM orders o
-        LEFT JOIN assets_stock a ON o.user_id = a.user_id
-                            AND o.stock_id = a.stock_id
+        LEFT JOIN assets_stock a ON o.id = a.order_id
         JOIN assets_total t ON o.user_id = t.user_id
         JOIN markets m ON o.stock_id = m.id
         WHERE
@@ -46,4 +45,7 @@ public interface OrdersRepository extends JpaRepository<Orders, Integer>{
     """,
     nativeQuery = true)
     List<ExecutionInfoProjection> findExecutionInfo();
+
+    
+    
 }

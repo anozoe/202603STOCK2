@@ -1,6 +1,7 @@
 package com.example.stock.repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -29,5 +30,5 @@ public interface AssetsStockRepository extends JpaRepository<AssetsStock, Intege
         @Param("userId") Integer userId,
         @Param("stockId") Integer stockId
     );
-    List<AssetsStock> findByOrderId(Integer orderId);
+    Optional<AssetsStock> findByOrderId(Integer orderId);
 }

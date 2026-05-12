@@ -40,9 +40,9 @@ public class ExecutionCheckService {
         for (ExecutionInfoResponse target : targetList ) {
             try {
                 if (target.getOrderSide() == ORDER_SIDE.BUY.getCode()) {
-                    updateCount += buyExecutionCheck(target) == true ? 1 : 0;  
+                    updateCount += buyExecutionCheck(target)  ? 1 : 0;  
                 } else if (target.getOrderSide() == ORDER_SIDE.SELL.getCode()) {
-                    updateCount += sellExecutionCheck(target) == true ? 1 : 0;
+                    updateCount += sellExecutionCheck(target) ? 1 : 0;
                 }
             } catch (Exception e) {
                 failCount++;

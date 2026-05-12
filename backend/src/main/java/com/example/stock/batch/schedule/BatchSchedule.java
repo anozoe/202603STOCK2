@@ -2,7 +2,6 @@ package com.example.stock.batch.schedule;
 
 import com.example.stock.batch.service.ExecutionCheckService;
 import com.example.stock.batch.service.MarketsSetupService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -34,7 +33,7 @@ public class BatchSchedule {
     // @Scheduled(cron = "0 0 17 * * MON-FRI", zone = "Asia/Tokyo")
     @Scheduled(cron = "0/25 * * * * MON-FRI", zone = "Asia/Tokyo")
     public void priceUpdate() {
-        priceUpdateService.updateCurrentPrice();
+        //priceUpdateService.updateCurrentPrice();
         executionCheckService.executionCheck();
     }
 }

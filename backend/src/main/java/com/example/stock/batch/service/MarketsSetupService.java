@@ -1,6 +1,7 @@
 package com.example.stock.batch.service;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -42,6 +43,7 @@ public class MarketsSetupService {
                 market.setHighPrice(previousClose);
                 market.setLowPrice(previousClose);
                 market.setFinishPrice(null);
+                market.setUpdatedAt(LocalDateTime.now());
                 updateCount++;
             } catch (Exception e) {
                 failCount++;

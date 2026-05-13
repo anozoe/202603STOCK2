@@ -1,6 +1,7 @@
 package com.example.stock.batch.schedule;
 
 import com.example.stock.batch.service.AssetsHistoryService;
+import com.example.stock.batch.service.AssetsUpdateService;
 import com.example.stock.batch.service.ExecutionCheckService;
 import com.example.stock.batch.service.MarketCloseService;
 import com.example.stock.batch.service.MarketsSetupService;
@@ -17,6 +18,7 @@ public class BatchSchedule {
     private final ExecutionCheckService executionCheckService;
     private final MarketCloseService marketCloseService;
     private final AssetsHistoryService assetsHistoryService;
+    private final AssetsUpdateService assetsUpdateService;
 
 
     BatchSchedule(
@@ -24,13 +26,15 @@ public class BatchSchedule {
         PriceUpdateService priceUpdateService, 
         ExecutionCheckService executionCheckService,
         MarketCloseService marketCloseService,
-        AssetsHistoryService assetsHistoryService
+        AssetsHistoryService assetsHistoryService,
+        AssetsUpdateService assetsUpdateService
     ){
             this.marketsSetupService = marketsSetupService;
             this.priceUpdateService = priceUpdateService;
             this.executionCheckService = executionCheckService;
             this.marketCloseService = marketCloseService;
             this.assetsHistoryService = assetsHistoryService;
+            this.assetsUpdateService = assetsUpdateService;
     }
 
 
@@ -38,6 +42,8 @@ public class BatchSchedule {
     public void marketsSetup() {
         marketsSetupService.setOpenPrice();
         executionCheckService.executionCheck();
+        assetsUpdateService.updateAssets();
+        
     }
     
     // @Scheduled(cron = "0 10/10 9 * * MON-FRI", zone = "Asia/Tokyo")
@@ -45,8 +51,9 @@ public class BatchSchedule {
     // @Scheduled(cron = "0 0 17 * * MON-FRI", zone = "Asia/Tokyo")
     @Scheduled(cron = "0 * * * * MON-FRI", zone = "Asia/Tokyo")
     public void priceUpdate() {
-        priceUpdateService.updateCurrentPrice();
+        // priceUpdateService.updateCurrentPrice();
         //executionCheckService.executionCheck();
+        assetsUpdateService.updateAssets();
     }
     
     public void marketClose(){

@@ -30,7 +30,7 @@ public class PriceUpdateService {
         List<Markets> marketsList = marketsRepository.findAll();
         int updateCount = 0;
         int failCount = 0;
-        // 2. 現在値安値高値更新
+        // 2. 現在値安値高値騰落率前日比更新
         for (Markets market : marketsList) {
             try {
                 BigDecimal currentPrice = market.getCurrentPrice();
@@ -54,14 +54,24 @@ public class PriceUpdateService {
         return new BatchResultDto(updateCount, failCount, "SUCCESS");
     }
     
-    // 現在値計算
+    /**
+     * 現在値計算<br>
+     * 直近の現在値の+3%~-3%の間で現在値を変動させる。
+     * @param currentPrice
+     * @return
+     */
     private BigDecimal calcCurrentPrice(BigDecimal currentPrice) {
         double randomValue = 1 + (Math.random() * 0.06 - 0.03);
         BigDecimal calcPrice = currentPrice.multiply(BigDecimal.valueOf(randomValue));
         return calcPrice.setScale(2, RoundingMode.HALF_UP);
     }
 
-    //　高値更新
+    /**
+     * 高値更新<br>
+     * 変動させた現在値が高値を更新したかどうか判断する。
+     * @param market    対象銘柄
+     * @param newPrice　変動させた現在値
+     */
     private void updateHighPrice(Markets market, BigDecimal newPrice) {
         BigDecimal currentHighPrice = market.getHighPrice();
         if (newPrice.compareTo(currentHighPrice) == 1) {

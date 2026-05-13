@@ -14,9 +14,11 @@ import com.example.stock.repository.MarketsRepository;
 import com.example.stock.service.TwelveDataClient;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class MarketsSetupService {
     private final MarketsRepository marketsRepository;
     private final TwelveDataClient twelveDataClient;
@@ -24,6 +26,7 @@ public class MarketsSetupService {
     // 始値設定バッチ
     @Transactional
     public BatchResultDto setOpenPrice() {
+        log.info("始値設定 開始");
         // 1. 全銘柄取得
         List<Markets> marketsList = marketsRepository.findAll();
         // 2. 外部APIから終値取得
@@ -43,6 +46,8 @@ public class MarketsSetupService {
                 market.setHighPrice(previousClose);
                 market.setLowPrice(previousClose);
                 market.setFinishPrice(null);
+                market.setPriceChange(null);
+                market.setChangeRate(null);
                 market.setUpdatedAt(LocalDateTime.now());
                 updateCount++;
             } catch (Exception e) {
@@ -50,6 +55,7 @@ public class MarketsSetupService {
                 System.out.println(symbol+"が取得できませんでした。");
             }            
         }
+        log.info("始値設定 終了 件数={}", updateCount);
         marketsRepository.saveAll(marketsList);
         return new BatchResultDto(updateCount, failCount, "SUCCESS");
     }

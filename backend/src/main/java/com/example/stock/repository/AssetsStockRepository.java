@@ -31,4 +31,5 @@ public interface AssetsStockRepository extends JpaRepository<AssetsStock, Intege
         @Param("stockId") Integer stockId
     );
     Optional<AssetsStock> findByOrderId(Integer orderId);
+
 }

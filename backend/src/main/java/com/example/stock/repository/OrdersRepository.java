@@ -46,6 +46,8 @@ public interface OrdersRepository extends JpaRepository<Orders, Integer>{
     nativeQuery = true)
     List<ExecutionInfoProjection> findExecutionInfo();
 
+    List<Orders> findByOrderExecutionStatus(Integer orderExecutionStatus);
+
     
     
 }

@@ -5,20 +5,24 @@ import com.example.stock.dto.UserInfoResponse;
 import com.example.stock.dto.UserLoginRequest;
 import com.example.stock.dto.UserRegisterRequest;
 import com.example.stock.dto.UserUpdateRequest;
+import com.example.stock.entity.AssetsTotal;
 import com.example.stock.entity.User;
 import com.example.stock.exception.BusinessException;
+import com.example.stock.repository.AssetsTotalRepository;
 import com.example.stock.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
 public class UserService {
 
+    private final AssetsTotalRepository assetsTotalRepository;
     private final PasswordEncoder passwordEncoder;
     private final UserRepository userRepository;
     private final CurrentUserService currentUserService;
@@ -49,13 +53,14 @@ public class UserService {
         try {
             userRepository.save(user);
         } catch (Exception e) {
+            e.printStackTrace();
             throw new BusinessException("E006");
         }
 
         return toUserInfoResponse(user);
     }
 
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void register(UserRegisterRequest request) {
         String name = request.getName() == null ? "" : request.getName().trim();
         String email = request.getEmail() == null ? "" : request.getEmail().trim();
@@ -76,9 +81,20 @@ public class UserService {
         user.setUpdatedAt(LocalDateTime.now());
         user.setUpdatedBy("system");
 
+        
         try {
-            userRepository.save(user);
+            User registeredUser = userRepository.save(user);
+
+            AssetsTotal assetsTotal = new AssetsTotal();
+            assetsTotal.setUserId(registeredUser.getId().intValue());
+            assetsTotal.setHoldingsValue(BigDecimal.ZERO);
+            assetsTotal.setTotalAssets(BigDecimal.ZERO);
+            assetsTotal.setUnrealizedPnl(BigDecimal.ZERO);
+            assetsTotal.setUnrealizedPnlRatio(BigDecimal.ZERO);
+            assetsTotal.setCreatedAt(LocalDateTime.now());
+            assetsTotalRepository.save(assetsTotal);
         } catch (Exception e) {
+            e.printStackTrace();   
             throw new BusinessException("E006");
         }
     }

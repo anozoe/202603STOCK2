@@ -6,6 +6,7 @@ import AdminPage from "./pages/AdminPage";
 import "./styles/common.css";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage"
+import OrderPage from "./pages/OrderPage";
 
 function App() {
   return (
@@ -17,6 +18,7 @@ function App() {
         <Route path="/stocks" element={<StockListPage />} />
         <Route path="/stocks/:tickerCode" element={<StockDetailPage />} />
         <Route path="/admin" element={<AdminPage />} />
+        <Route path="/order/:tickerCode" element={<OrderPage />} />
       </Routes>
     </BrowserRouter>
   );

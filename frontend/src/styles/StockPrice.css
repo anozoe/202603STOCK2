@@ -1,0 +1,58 @@
+.stock-detail-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px 16px;
+  font-size: 14px;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+}
+
+.stock-detail-line {
+  display: flex;
+  align-items: baseline;
+}
+
+.stock-detail-line .label {
+  color: #4b5563;
+  min-width: 9em;
+  flex-shrink: 0;
+}
+
+.stock-detail-line .value {
+  color: #111827;
+}
+
+/* 銘柄名は強調 */
+.stock-detail-name-line .value {
+  font-weight: 700;
+  font-size: 16px;
+}
+
+/* 前日比の色 */
+.price-up {
+  color: #16a34a;   /* 緑 */
+  font-weight: 600;
+}
+
+.price-down {
+  color: #dc2626;   /* 赤 */
+  font-weight: 600;
+}
+
+.price-flat {
+  color: #4b5563;
+}
+
+/* 状態表示 */
+.stock-detail-loading,
+.stock-detail-error {
+  padding: 16px;
+  color: #6b7280;
+  font-size: 14px;
+}
+
+.stock-detail-error {
+  color: #dc2626;
+}

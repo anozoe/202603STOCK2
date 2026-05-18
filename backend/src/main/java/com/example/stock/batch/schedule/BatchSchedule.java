@@ -49,10 +49,9 @@ public class BatchSchedule {
     // @Scheduled(cron = "0 10/10 9 * * MON-FRI", zone = "Asia/Tokyo")
     // @Scheduled(cron = "0 0/10 10-16 * * MON-FRI", zone = "Asia/Tokyo")
     // @Scheduled(cron = "0 0 17 * * MON-FRI", zone = "Asia/Tokyo")
-    @Scheduled(cron = "0 * * * * MON-FRI", zone = "Asia/Tokyo")
     public void priceUpdate() {
-        // priceUpdateService.updateCurrentPrice();
-        //executionCheckService.executionCheck();
+        priceUpdateService.updateCurrentPrice();
+        executionCheckService.executionCheck();
         assetsUpdateService.updateAssets();
     }
     

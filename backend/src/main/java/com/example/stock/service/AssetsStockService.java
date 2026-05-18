@@ -1,0 +1,46 @@
+package com.example.stock.service;
+
+import java.util.List;
+import java.util.Optional;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.example.stock.dto.AssetsStockResponse;
+import com.example.stock.dto.SumHoldingAmountProjection;
+import com.example.stock.dto.SumHoldingAmountResponse;
+import com.example.stock.repository.AssetsStockRepository;
+
+import lombok.RequiredArgsConstructor;
+
+@Service
+@RequiredArgsConstructor
+public class AssetsStockService {
+    private final AssetsStockRepository assetsStockRepository;
+
+    @Transactional
+    public List<AssetsStockResponse> getAssetsStock(Integer userId){
+        List<AssetsStockResponse> stockList = assetsStockRepository.findAssetsStockInfo(userId)
+                                                                   .stream()
+                                                                   .map(p -> new AssetsStockResponse(p.getId(), 
+                                                                            p.getUserId(), 
+                                                                            p.gettickerCode(), 
+                                                                            p.getAveragePrice(), 
+                                                                            p.getProfitLoss(), 
+                                                                            p.getProfitLossRatio(), 
+                                                                            p.getMarketValue(), 
+                                                                            p.getHoldingAmount()))
+                                                                   .toList();
+        return stockList;
+    }
+
+    @Transactional
+    public SumHoldingAmountResponse getSumHoldingAmount(Integer userId, String tickerCode){
+        SumHoldingAmountProjection projection = assetsStockRepository.findSumHoldingAmount(userId, tickerCode).orElseThrow();
+        SumHoldingAmountResponse response = new SumHoldingAmountResponse();
+        response.setUserId(projection.getUserId());
+        response.setTickerCode(projection.getTickerCode());
+        response.setSumHoldingAmount(projection.getSumHoldingAmount());
+        return response; 
+    }
+}

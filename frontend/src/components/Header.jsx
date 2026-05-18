@@ -7,6 +7,7 @@ const pageTitles = {
   "/admin": "管理者",
   "/mypage": "マイページ",
   "/stocks": "銘柄一覧",
+  "/order": "注文"
 };
 
 function getTitle(pathname) {

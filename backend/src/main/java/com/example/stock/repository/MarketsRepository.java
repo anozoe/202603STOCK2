@@ -6,6 +6,8 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
 import com.example.stock.entity.Markets;
+import java.util.Optional;
+
 
 
 
@@ -17,5 +19,7 @@ public interface MarketsRepository extends JpaRepository<Markets, Integer>{
                 m.updatedAt = CURRENT_TIMESTAMP
             """)
     public int updateFinishPriceToCurrentPrice();
+
+    Optional<Markets> findByTickerCode(String tickerCode);
 
 }

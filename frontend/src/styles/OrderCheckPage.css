@@ -1,0 +1,103 @@
+.order-check-page {
+    min-height: 100vh;
+    background-color: #ffffff;
+    padding: 20px 0;
+}
+
+.order-card {
+    max-width: 380px;
+    margin: 0 auto;
+    background-color: #ffffff;
+    border-radius: 6px;
+    box-shadow: 0 0 0 1px #e5e7eb, 0 2px 6px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+    margin-top: 15px;
+}
+
+.order-card-header {
+    background-color: #eea92a;
+    color: #ffffff;
+    text-align: center;
+    padding: 10px;
+    font-weight: bold;
+    font-size: 15px;
+}
+
+.stock-info {
+    text-align: center;
+    padding: 16px 16px 18px;
+}
+
+.ticker-code {
+    font-size: 13px;
+    color: #333333;
+}
+
+.stock-name {
+    font-size: 20px;
+    font-weight: bold;
+    margin: 2px 0;
+    color: #000000;
+}
+
+.market-name {
+    font-size: 12px;
+    color: #555555;
+}
+
+.order-details {
+    padding: 0 20px;
+}
+
+.detail-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 11px 0;
+    border-top: 1px solid #e5e7eb;
+    font-size: 13px;
+}
+
+.detail-label {
+    color: #666666;
+}
+
+.detail-value {
+    color: #000000;
+}
+
+.detail-value-bold {
+    font-weight: bold;
+}
+
+.notice-box {
+    margin: 16px 12px;
+    padding: 10px 12px;
+    background-color: #fef2e2;
+    border-radius: 4px;
+    font-size: 11px;
+    color: #5a4a2a;
+    line-height: 1.7;
+}
+
+.button-container {
+    display: flex;
+    justify-content: space-between;
+    padding: 4px 20px 24px;
+    gap: 24px;
+}
+
+.action-button {
+    flex: 1;
+    padding: 12px 0;
+    border: 1px solid #b0b0b0;
+    border-radius: 4px;
+    background-color: #ffffff;
+    cursor: pointer;
+    font-size: 13px;
+    color: #000000;
+}
+
+.action-button:hover {
+    background-color: #f9fafb;
+}

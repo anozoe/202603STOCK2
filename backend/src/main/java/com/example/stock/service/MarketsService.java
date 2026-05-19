@@ -18,6 +18,7 @@ public class MarketsService {
     public MarketsDetailResponse getMarketDetail(String tickerCode) {
         Markets market = marketsRepository.findByTickerCode(tickerCode).orElseThrow();
         MarketsDetailResponse detail = new MarketsDetailResponse(
+            market.getId(),
             market.getTickerCode(), 
             market.getStockName(),
             market.getMarket(),

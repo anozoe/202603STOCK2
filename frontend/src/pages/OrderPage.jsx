@@ -1,4 +1,4 @@
-import React, { use, useCallback, useEffect, useState } from 'react'
+import React, { use, useCallback, useContext, useEffect, useState } from 'react'
 import Header from '../components/Header'
 import { IgrTabs, IgrTab } from "igniteui-react";
 import "../styles/OrderPage.css"
@@ -7,6 +7,7 @@ import StockPrice from '../components/StockPrice';
 import { fetchMarketsDetail } from '../api/MarketsApi';
 import { getLoginUserId } from '../utils/authHeader';
 import { fetchAssetsStock, fetchAssetTotal, fetchStockAmount } from '../api/AssetsApi';
+import { OrderContext } from '../OrderContext';
 
 
 function OrderPage() {
@@ -26,7 +27,15 @@ function OrderPage() {
         { id: 2, message:"指値"}
     ];
 
-    const [radioButtonNumber, setRadioButtonNumber] = useState(1);
+    // 1. Context から取り出す
+    const { order, setOrder } = useContext(OrderContext);
+
+    // 2. state を宣言(Context の値で初期化)
+    const [quantity, setQuantity] = useState(order.quantity || 0);
+    const [price, setPrice] = useState(order.limitPrice || 0);
+    const [activeTab, setActiveTab] = useState(order.orderSide || 'buy');
+    const [radioButtonNumber, setRadioButtonNumber] = useState(order.orderMethod || 1);
+
     const radioButtonChanged = (e) => {
         console.log(e.target.value);
         setRadioButtonNumber(Number(e.target.value));
@@ -35,11 +44,6 @@ function OrderPage() {
         const selected = orderMethod.find(v => v.id === radioButtonNumber);
         alert(`${[selected.message]}`);
     }
-
-    const [quantity, setQuantity] = useState(0);
-    const [price, setPrice] = useState(0);
-    const [activeTab, setActiveTab] = useState('buy');
-    
 
     useEffect(() => {
         const loadDetail = async () => {
@@ -88,7 +92,7 @@ function OrderPage() {
         loadStockAmount();
     }, []);
 
-
+    // 3. その state を使った計算
     const currentPrice = data?.currentPrice ?? 0;
     const buyingPower = assetsTotalData?.buyingPower ?? 0;
     const estimatedAmount = quantity * (radioButtonNumber === 1 ? currentPrice : price);
@@ -96,6 +100,25 @@ function OrderPage() {
     const holdingAmount = stockAmountData?.sumHoldingAmount ?? 0;
     const isSellDisabled = holdingAmount <= 0;
 
+    const handleOrderCheck = () => {
+        const newOrder = {
+            stockId: data.id,
+            tickerCode,
+            stockName: data.stockName,
+            market: data.market,
+            orderSide: activeTab,
+            orderMethod: radioButtonNumber,
+            quantity,
+            limitPrice: price,
+            currentPrice: data.currentPrice,
+            buyingPower: buyingPower,
+            holdingAmount: holdingAmount
+        };
+        console.log('注文内容:', newOrder);
+        setOrder(newOrder);
+        navigate('/order/check');
+    }
+    
   return (
     <div>
         <Header />
@@ -188,7 +211,12 @@ function OrderPage() {
                                     <div>${buyingPowerAfterOrder<0 ? 0 : buyingPowerAfterOrder}</div>
                                 </div>
                             </div>
-                            <button className='check-btn'>確認画面へ</button>
+                            <button 
+                                className='check-btn'
+                                onClick={handleOrderCheck}
+                            >
+                                確認画面へ
+                            </button>
                         </div>
                     )}
                     {activeTab === 'sell' && (
@@ -255,7 +283,12 @@ function OrderPage() {
                                     <div>${buyingPowerAfterOrder<0 ? 0 : buyingPowerAfterOrder}</div>
                                 </div>
                             </div>
-                            <button className='check-btn'>確認画面へ</button>
+                            <button 
+                                className='check-btn'
+                                onClick={handleOrderCheck}
+                            >
+                                確認画面へ
+                            </button>
                         </div>
                     )}
                 </div>                   

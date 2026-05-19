@@ -11,6 +11,7 @@ import java.util.Optional;
 
 
 
+
 public interface MarketsRepository extends JpaRepository<Markets, Integer>{
     @Modifying
     @Query("""
@@ -21,5 +22,4 @@ public interface MarketsRepository extends JpaRepository<Markets, Integer>{
     public int updateFinishPriceToCurrentPrice();
 
     Optional<Markets> findByTickerCode(String tickerCode);
-
 }

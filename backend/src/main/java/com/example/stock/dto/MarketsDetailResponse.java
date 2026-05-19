@@ -9,6 +9,7 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 public class MarketsDetailResponse {
+    private Integer id;
     private String tickerCode;
     private String stockName;
     private String market;

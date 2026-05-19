@@ -13,6 +13,7 @@ const pageTitles = {
 function getTitle(pathname) {
   if (pageTitles[pathname]) return pageTitles[pathname];
   if (pathname.startsWith("/stocks/")) return "株価詳細";
+  if (pathname.startsWith("/order/")) return "注文";
   return "画面名";
 }
 

@@ -4,12 +4,10 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.example.stock.batch.service.ExecutionCheckService;
 import com.example.stock.constants.ORDER_METHOD;
 import com.example.stock.constants.ORDER_SIDE;
 import com.example.stock.constants.ORDER_STATUS;
@@ -36,7 +34,9 @@ public class OrderService {
     public OrderResponse orderRegister(OrderRequest request) {
         LocalDateTime executedTime = LocalDateTime.now();
         boolean isMarketOrder = ORDER_METHOD.MarketOrder.getCode() == request.getOrderMethod();
+
         Orders newOrder = addOrderRecord(request, isMarketOrder, executedTime);
+        
         boolean isBuy = newOrder.getOrderSide().equals(ORDER_SIDE.BUY.getCode());
         boolean isSell = newOrder.getOrderSide().equals(ORDER_SIDE.SELL.getCode());
 
@@ -123,7 +123,7 @@ public class OrderService {
 
     /**
      * 成行・買い注文処理<br>
-     * 注文内容と約定時間を渡して、その情報をもとにassets_stockとassets_totalのレコードを新たに作成し保存する。
+     * 注文内容と約定時間を渡して、その情報をもとにassets_stockのレコードを新たに作成し保存する。
      * @param newOrder      注文内容（orders）
      * @param executedTime  約定時間
      */
@@ -180,7 +180,6 @@ public class OrderService {
         
         AssetsTotal assets = assetsTotalRepository.findByUserId(request.getUserId()).orElseThrow(() -> new IllegalStateException("AssetsTotal not found: userId=" + request.getUserId()));
 
-
         BigDecimal currentBuyingPower = assets.getBuyingPower();
         BigDecimal currentHoldingsValue = assets.getHoldingsValue();
         BigDecimal currentUnrealizedPnl = assets.getUnrealizedPnl();
@@ -191,7 +190,6 @@ public class OrderService {
         BigDecimal newUnrealizedPnl = currentUnrealizedPnl.add(pnlDelta);
         BigDecimal principal = newHoldingsValue.subtract(newUnrealizedPnl);
         BigDecimal newUnrealizedPnlRatio = calcRatio(newUnrealizedPnl, principal);
-
 
         assets.setBuyingPower(newBuyingPower);
         assets.setHoldingsValue(newHoldingsValue);

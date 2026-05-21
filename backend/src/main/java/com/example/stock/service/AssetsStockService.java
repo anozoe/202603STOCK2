@@ -6,6 +6,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.example.stock.dto.AssetsStockResponse;
+import com.example.stock.dto.HoldingStockProjection;
+import com.example.stock.dto.HoldingStockResponse;
 import com.example.stock.dto.SumHoldingAmountProjection;
 import com.example.stock.dto.SumHoldingAmountResponse;
 import com.example.stock.repository.AssetsStockRepository;
@@ -42,4 +44,23 @@ public class AssetsStockService {
         response.setSumHoldingAmount(projection.getSumHoldingAmount());
         return response; 
     }
+
+    @Transactional(readOnly = true)
+    public List<HoldingStockResponse> getHoldingStock(Integer userId) {
+        List<HoldingStockProjection> holdingList = assetsStockRepository.findHoldingStock(userId);
+        
+        return holdingList.stream()    
+                .map(p -> new HoldingStockResponse(   
+                    p.getTickerCode(),
+                    p.getStockName(),
+                    p.getMarket(),
+                    p.getCurrentPrice(),
+                    p.getPriceChange(),
+                    p.getChangeRate(),
+                    p.getTotalCost(),
+                    p.getTotalMarketValue(),
+                    p.getTotalHoldingAmount()
+                ))
+                .toList();
+    }                                                     
 }

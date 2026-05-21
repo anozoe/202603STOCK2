@@ -2,10 +2,13 @@ package com.example.stock.repository;
 
 
 
+import java.util.List;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
+import com.example.stock.dto.AssetsTotalHistoryResponse;
 import com.example.stock.entity.AssetsTotalHistory;
 
 public interface AssetsTotalHistoryRepository extends JpaRepository<AssetsTotalHistory, Integer> {
@@ -38,4 +41,5 @@ public interface AssetsTotalHistoryRepository extends JpaRepository<AssetsTotalH
     )
     int insertHistoryFromAssetsTotal(Integer fridayJudge);
 
+    List<AssetsTotalHistory> findByUserId(Integer userId);
 }

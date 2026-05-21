@@ -1,6 +1,7 @@
 package com.example.stock.service;
 
 import com.example.stock.constants.BusinessConstants;
+import com.example.stock.constants.MarketCode;
 import com.example.stock.dto.FavoriteStockListResponse;
 import com.example.stock.dto.FavoriteToggleResponse;
 import com.example.stock.dto.StockChartPointResponse;
@@ -8,11 +9,13 @@ import com.example.stock.dto.StockDetailResponse;
 import com.example.stock.dto.StockListItemResponse;
 import com.example.stock.dto.StockListResponse;
 import com.example.stock.dto.StockOverviewResponse;
+import com.example.stock.entity.Markets;
 import com.example.stock.entity.Stock;
 import com.example.stock.entity.StockPriceHistory;
 import com.example.stock.entity.User;
 import com.example.stock.entity.UserFavorite;
 import com.example.stock.exception.BusinessException;
+import com.example.stock.repository.MarketsRepository;
 import com.example.stock.repository.StockPriceHistoryRepository;
 import com.example.stock.repository.StockRepository;
 import com.example.stock.repository.UserFavoriteRepository;
@@ -28,245 +31,263 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class StockService {
 
-    private final StockRepository stockRepository;
-    private final StockPriceHistoryRepository stockPriceHistoryRepository;
-    private final UserFavoriteRepository userFavoriteRepository;
-    private final UserRepository userRepository;
-    private final CurrentUserService currentUserService;
+        private final StockRepository stockRepository;
+        private final MarketsRepository marketsRepository;
+        private final StockPriceHistoryRepository stockPriceHistoryRepository;
+        private final UserFavoriteRepository userFavoriteRepository;
+        private final UserRepository userRepository;
+        private final CurrentUserService currentUserService;
 
-    @Transactional(readOnly = true)
-    public StockListResponse getStocks(String keyword, int page, int size) {
-        Long currentUserId = currentUserService.getCurrentUserId();
+        @Transactional(readOnly = true)
+        public StockListResponse getStocks(String keyword, int page, int size) {
+                Long currentUserId = currentUserService.getCurrentUserId();
+                System.out.println(">>> currentUserId = " + currentUserId);
 
-        int pageIndex = Math.max(page, 0);
-        String trimmedKeyword = keyword == null ? "" : keyword.trim();
+                int pageIndex = Math.max(page, 0);
+                String trimmedKeyword = keyword == null ? "" : keyword.trim();
 
-        Page<Stock> result;
-        if (trimmedKeyword.isEmpty()) {
-            result = stockRepository.findAllByOrderByDisplayOrderAscIdAsc(
-                    PageRequest.of(pageIndex, size)
-            );
-        } else {
-            result = stockRepository
-                    .findByTickerCodeContainingIgnoreCaseOrStockNameContainingIgnoreCaseOrderByDisplayOrderAscIdAsc(
-                            trimmedKeyword,
-                            trimmedKeyword,
-                            PageRequest.of(pageIndex, size)
-                    );
+                Page<Markets> result;
+
+                if (trimmedKeyword.isEmpty()) {
+                        result = marketsRepository.findAllByOrderByDisplayOrderAscIdAsc(
+                                        PageRequest.of(pageIndex, size));
+                } else {
+                        result = marketsRepository.searchByKeywordOrderByDisplayOrderAscIdAsc(
+                                        trimmedKeyword,
+                                        PageRequest.of(pageIndex, size));
+                }
+
+                int currentFavoriteCount = userFavoriteRepository.countByUserId(currentUserId);
+
+                List<String> tickerCodes = result.getContent().stream()
+                                .map(Markets::getTickerCode)
+                                .toList();
+
+                Map<String, Long> marketCapByTicker = tickerCodes.isEmpty()
+                                ? Map.of()
+                                : stockRepository.findByTickerCodeIn(tickerCodes).stream()
+                                                .filter(s -> s.getMarketCap() != null)
+                                                .collect(Collectors.toMap(
+                                                                Stock::getTickerCode,
+                                                                Stock::getMarketCap));
+
+                List<StockListItemResponse> items = result.getContent().stream()
+                                .map(stock -> new StockListItemResponse(
+                                                stock.getTickerCode(),
+                                                stock.getStockName(),
+                                                stock.getMarket(),
+                                                stock.getCurrentPrice(),
+                                                stock.getPriceChange(),
+                                                stock.getChangeRate(),
+                                                marketCapByTicker.get(stock.getTickerCode()),
+                                                userFavoriteRepository.existsByUserIdAndStockId(
+                                                                currentUserId,
+                                                                stock.getStockId())))
+                                .toList();
+
+                return new StockListResponse(
+                                Math.toIntExact(result.getTotalElements()),
+                                pageIndex,
+                                size,
+                                result.getTotalPages(),
+                                currentFavoriteCount,
+                                BusinessConstants.MAX_FAVORITE_COUNT,
+                                items);
         }
 
-        int currentFavoriteCount = userFavoriteRepository.countByUserId(currentUserId);
+        @Transactional(readOnly = true)
+        public FavoriteStockListResponse getFavoriteStocks(int page, int size) {
+                Long currentUserId = currentUserService.getCurrentUserId();
 
-        List<StockListItemResponse> items = result.getContent().stream()
-                .map(stock -> new StockListItemResponse(
-                        stock.getTickerCode(),
-                        stock.getStockName(),
-                        stock.getMarket(),
-                        stock.getCurrentPrice(),
-                        stock.getPriceChange(),
-                        stock.getChangeRate(),
-                        stock.getMarketCap(),
-                        userFavoriteRepository.existsByUserIdAndStockId(
+                int pageIndex = Math.max(page, 0);
+
+                Page<UserFavorite> result = userFavoriteRepository.findByUserIdOrderByStockIdAsc(
                                 currentUserId,
-                                stock.getId()
-                        )
-                ))
-                .toList();
+                                PageRequest.of(pageIndex, size));
 
-        return new StockListResponse(
-                Math.toIntExact(result.getTotalElements()),
-                pageIndex,
-                size,
-                result.getTotalPages(),
-                currentFavoriteCount,
-                BusinessConstants.MAX_FAVORITE_COUNT,
-                items
-        );
-    }
+                int currentFavoriteCount = userFavoriteRepository.countByUserId(currentUserId);
 
-    @Transactional(readOnly = true)
-    public FavoriteStockListResponse getFavoriteStocks(int page, int size) {
-        Long currentUserId = currentUserService.getCurrentUserId();
+                List<Stock> sortedStocks = result.getContent().stream()
+                                .map(UserFavorite::getStock)
+                                .sorted(Comparator
+                                                .comparing((Stock s) -> s.getDisplayOrder() == null ? Integer.MAX_VALUE
+                                                                : s.getDisplayOrder())
+                                                .thenComparing(Stock::getId))
+                                .toList();
 
-        int pageIndex = Math.max(page, 0);
+                List<String> tickerCodes = sortedStocks.stream()
+                                .map(Stock::getTickerCode)
+                                .toList();
 
-        Page<UserFavorite> result = userFavoriteRepository.findByUserIdOrderByStockIdAsc(
-                currentUserId,
-                PageRequest.of(pageIndex, size)
-        );
+                Map<String, Markets> marketsByTicker = tickerCodes.isEmpty()
+                                ? Map.of()
+                                : marketsRepository.findByTickerCodeIn(tickerCodes).stream()
+                                                .collect(Collectors.toMap(Markets::getTickerCode, m -> m));
 
-        int currentFavoriteCount = userFavoriteRepository.countByUserId(currentUserId);
+                List<StockListItemResponse> items = sortedStocks.stream()
+                                .map(stock -> {
+                                        Markets market = marketsByTicker.get(stock.getTickerCode());
+                                        return new StockListItemResponse(
+                                                        stock.getTickerCode(),
+                                                        stock.getStockName(),
+                                                        market != null ? market.getMarket()
+                                                                        : MarketCode.toName(stock.getMarket()),
+                                                        market != null ? market.getCurrentPrice()
+                                                                        : stock.getCurrentPrice(),
+                                                        market != null ? market.getPriceChange()
+                                                                        : stock.getPriceChange(),
+                                                        market != null ? market.getChangeRate() : stock.getChangeRate(),
+                                                        stock.getMarketCap(),
+                                                        true);
+                                })
+                                .toList();
 
-        List<StockListItemResponse> items = result.getContent().stream()
-                .map(UserFavorite::getStock)
-                .sorted(Comparator
-                        .comparing((Stock s) -> s.getDisplayOrder() == null ? Integer.MAX_VALUE : s.getDisplayOrder())
-                        .thenComparing(Stock::getId))
-                .map(stock -> new StockListItemResponse(
-                        stock.getTickerCode(),
-                        stock.getStockName(),
-                        stock.getMarket(),
-                        stock.getCurrentPrice(),
-                        stock.getPriceChange(),
-                        stock.getChangeRate(),
-                        stock.getMarketCap(),
-                        true
-                ))
-                .toList();
-
-        return new FavoriteStockListResponse(
-                Math.toIntExact(result.getTotalElements()),
-                pageIndex,
-                size,
-                result.getTotalPages(),
-                currentFavoriteCount,
-                BusinessConstants.MAX_FAVORITE_COUNT,
-                items
-        );
-    }
-
-    @Transactional(readOnly = true)
-    public StockDetailResponse getStockDetail(String tickerCode) {
-        Stock stock = stockRepository.findByTickerCode(tickerCode)
-                .orElseThrow(() -> new BusinessException("E010", "銘柄"));
-
-        StockOverviewResponse overview = new StockOverviewResponse(
-                stock.getOpenPrice(),
-                stock.getHighPrice(),
-                stock.getLowPrice(),
-                stock.getClosePrice(),
-                stock.getPer(),
-                stock.getPbr(),
-                stock.getRoe(),
-                stock.getDividendYield(),
-                stock.getVolume(),
-                stock.getMarketCap()
-        );
-
-        List<StockChartPointResponse> weekChart = toChartResponse(
-                stockPriceHistoryRepository.findTop7ByStockIdOrderByPriceDateDesc(stock.getId())
-        );
-
-        List<StockChartPointResponse> monthChart = toChartResponse(
-                stockPriceHistoryRepository.findTop30ByStockIdOrderByPriceDateDesc(stock.getId())
-        );
-
-        return new StockDetailResponse(
-                stock.getTickerCode(),
-                stock.getStockName(),
-                stock.getMarket(),
-                stock.getMarketStatus(),
-                stock.getCurrentPrice(),
-                stock.getPriceChange(),
-                stock.getChangeRate(),
-                stock.getFetchedAt(),
-                overview,
-                weekChart,
-                monthChart
-        );
-    }
-
-    @Transactional
-    public FavoriteToggleResponse addFavorite(String tickerCode) {
-        Long currentUserId = currentUserService.getCurrentUserId();
-
-        Stock stock = stockRepository.findByTickerCode(tickerCode)
-                .orElseThrow(() -> new BusinessException("E010", "銘柄"));
-
-        int currentFavoriteCount = userFavoriteRepository.countByUserId(currentUserId);
-        if (currentFavoriteCount >= BusinessConstants.MAX_FAVORITE_COUNT) {
-            throw new BusinessException("E012", "お気に入り銘柄", "登録");
+                return new FavoriteStockListResponse(
+                                Math.toIntExact(result.getTotalElements()),
+                                pageIndex,
+                                size,
+                                result.getTotalPages(),
+                                currentFavoriteCount,
+                                BusinessConstants.MAX_FAVORITE_COUNT,
+                                items);
         }
 
-        boolean exists = userFavoriteRepository.existsByUserIdAndStockId(
-                currentUserId,
-                stock.getId()
-        );
+        @Transactional(readOnly = true)
+        public StockDetailResponse getStockDetail(String tickerCode) {
+                Stock stock = stockRepository.findByTickerCode(tickerCode)
+                                .orElseThrow(() -> new BusinessException("E010", "銘柄"));
 
-        if (!exists) {
-            User user = userRepository.findById(currentUserId)
-                    .orElseThrow(() -> new BusinessException("E010", "ユーザ"));
+                StockOverviewResponse overview = new StockOverviewResponse(
+                                stock.getOpenPrice(),
+                                stock.getHighPrice(),
+                                stock.getLowPrice(),
+                                stock.getClosePrice(),
+                                stock.getPer(),
+                                stock.getPbr(),
+                                stock.getRoe(),
+                                stock.getDividendYield(),
+                                stock.getVolume(),
+                                stock.getMarketCap());
 
-            UserFavorite favorite = new UserFavorite();
-            favorite.setUser(user);
-            favorite.setStock(stock);
-            favorite.setCreatedAt(LocalDateTime.now());
-            favorite.setCreatedBy("system");
-            userFavoriteRepository.save(favorite);
+                List<StockChartPointResponse> weekChart = toChartResponse(
+                                stockPriceHistoryRepository.findTop7ByStockIdOrderByPriceDateDesc(stock.getId()));
+
+                List<StockChartPointResponse> monthChart = toChartResponse(
+                                stockPriceHistoryRepository.findTop30ByStockIdOrderByPriceDateDesc(stock.getId()));
+
+                return new StockDetailResponse(
+                                stock.getTickerCode(),
+                                stock.getStockName(),
+                                stock.getMarket(),
+                                stock.getMarketStatus(),
+                                stock.getCurrentPrice(),
+                                stock.getPriceChange(),
+                                stock.getChangeRate(),
+                                stock.getFetchedAt(),
+                                overview,
+                                weekChart,
+                                monthChart);
         }
 
-        return new FavoriteToggleResponse(true);
-    }
+        @Transactional
+        public FavoriteToggleResponse addFavorite(String tickerCode) {
+                Long currentUserId = currentUserService.getCurrentUserId();
 
-    @Transactional
-    public FavoriteToggleResponse removeFavorite(String tickerCode) {
-        Long currentUserId = currentUserService.getCurrentUserId();
+                Stock stock = stockRepository.findByTickerCode(tickerCode)
+                                .orElseThrow(() -> new BusinessException("E010", "銘柄"));
 
-        Stock stock = stockRepository.findByTickerCode(tickerCode)
-                .orElseThrow(() -> new BusinessException("E010", "銘柄"));
+                int currentFavoriteCount = userFavoriteRepository.countByUserId(currentUserId);
+                if (currentFavoriteCount >= BusinessConstants.MAX_FAVORITE_COUNT) {
+                        throw new BusinessException("E012", "お気に入り銘柄", "登録");
+                }
 
-        boolean exists = userFavoriteRepository.existsByUserIdAndStockId(
-                currentUserId,
-                stock.getId()
-        );
+                boolean exists = userFavoriteRepository.existsByUserIdAndStockId(
+                                currentUserId,
+                                stock.getId());
 
-        if (exists) {
-            userFavoriteRepository.deleteByUserIdAndStockId(
-                    currentUserId,
-                    stock.getId()
-            );
+                if (!exists) {
+                        User user = userRepository.findById(currentUserId)
+                                        .orElseThrow(() -> new BusinessException("E010", "ユーザ"));
+
+                        UserFavorite favorite = new UserFavorite();
+                        favorite.setUser(user);
+                        favorite.setStock(stock);
+                        favorite.setCreatedAt(LocalDateTime.now());
+                        favorite.setCreatedBy("system");
+                        userFavoriteRepository.save(favorite);
+                }
+
+                return new FavoriteToggleResponse(true);
         }
 
-        return new FavoriteToggleResponse(false);
-    }
+        @Transactional
+        public FavoriteToggleResponse removeFavorite(String tickerCode) {
+                Long currentUserId = currentUserService.getCurrentUserId();
 
-    private List<StockChartPointResponse> toChartResponse(List<StockPriceHistory> histories) {
-        List<StockPriceHistory> sorted = histories.stream()
-                .sorted(Comparator.comparing(StockPriceHistory::getPriceDate))
-                .toList();
+                Stock stock = stockRepository.findByTickerCode(tickerCode)
+                                .orElseThrow(() -> new BusinessException("E010", "銘柄"));
 
-        List<StockChartPointResponse> result = new ArrayList<>();
+                boolean exists = userFavoriteRepository.existsByUserIdAndStockId(
+                                currentUserId,
+                                stock.getId());
 
-        for (int i = 0; i < sorted.size(); i++) {
-            StockPriceHistory history = sorted.get(i);
+                if (exists) {
+                        userFavoriteRepository.deleteByUserIdAndStockId(
+                                        currentUserId,
+                                        stock.getId());
+                }
 
-            BigDecimal movingAverage5 = calculateMovingAverage5(sorted, i);
-
-            result.add(new StockChartPointResponse(
-                    history.getPriceDate(),
-                    history.getOpenPrice(),
-                    history.getHighPrice(),
-                    history.getLowPrice(),
-                    history.getClosePrice(),
-                    movingAverage5
-            ));
+                return new FavoriteToggleResponse(false);
         }
 
-        return result;
-    }
+        private List<StockChartPointResponse> toChartResponse(List<StockPriceHistory> histories) {
+                List<StockPriceHistory> sorted = histories.stream()
+                                .sorted(Comparator.comparing(StockPriceHistory::getPriceDate))
+                                .toList();
 
-    private BigDecimal calculateMovingAverage5(List<StockPriceHistory> histories, int currentIndex) {
-        int start = Math.max(0, currentIndex - 4);
+                List<StockChartPointResponse> result = new ArrayList<>();
 
-        BigDecimal total = BigDecimal.ZERO;
-        int count = 0;
+                for (int i = 0; i < sorted.size(); i++) {
+                        StockPriceHistory history = sorted.get(i);
 
-        for (int i = start; i <= currentIndex; i++) {
-            if (histories.get(i).getClosePrice() != null) {
-                total = total.add(histories.get(i).getClosePrice());
-                count++;
-            }
+                        BigDecimal movingAverage5 = calculateMovingAverage5(sorted, i);
+
+                        result.add(new StockChartPointResponse(
+                                        history.getPriceDate(),
+                                        history.getOpenPrice(),
+                                        history.getHighPrice(),
+                                        history.getLowPrice(),
+                                        history.getClosePrice(),
+                                        movingAverage5));
+                }
+
+                return result;
         }
 
-        if (count == 0) {
-            return null;
-        }
+        private BigDecimal calculateMovingAverage5(List<StockPriceHistory> histories, int currentIndex) {
+                int start = Math.max(0, currentIndex - 4);
 
-        return total.divide(BigDecimal.valueOf(count), 4, java.math.RoundingMode.HALF_UP);
-    }
+                BigDecimal total = BigDecimal.ZERO;
+                int count = 0;
+
+                for (int i = start; i <= currentIndex; i++) {
+                        if (histories.get(i).getClosePrice() != null) {
+                                total = total.add(histories.get(i).getClosePrice());
+                                count++;
+                        }
+                }
+
+                if (count == 0) {
+                        return null;
+                }
+
+                return total.divide(BigDecimal.valueOf(count), 4, java.math.RoundingMode.HALF_UP);
+        }
 }

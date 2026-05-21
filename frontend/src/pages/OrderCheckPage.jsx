@@ -36,6 +36,7 @@ function OrderCheckPage() {
         console.log('orderData to send:', orderData);  
         try {
             const response = await orderRegisterApi(orderData);
+            sessionStorage.setItem("mypage_tab", "holding");
             navigate(`/mypage`, { state: { response } });
         } catch (e) {
             setError('注文の送信に失敗しました。');

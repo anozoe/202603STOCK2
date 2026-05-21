@@ -14,3 +14,7 @@ export async function fetchAssetsStock(userId) {
 export async function fetchStockAmount(userId, tickerCode) {
     return fetchJson(`${BASE_URL}/amount?userId=${userId}&tickerCode=${tickerCode}`)
 }
+
+export async function fetchHoldingStock(userId) {
+    return fetchJson(`${BASE_URL}/holding?userId=${userId}`)
+}

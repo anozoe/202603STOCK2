@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.stock.dto.AssetsStockResponse;
+import com.example.stock.dto.HoldingStockResponse;
 import com.example.stock.dto.SumHoldingAmountResponse;
 import com.example.stock.service.AssetsStockService;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -32,6 +33,12 @@ public class AssetsStockController {
     public SumHoldingAmountResponse getSumHoldingAmount(@RequestParam Integer userId, @RequestParam String tickerCode) {
         return assetsStockService.getSumHoldingAmount(userId, tickerCode);
     }
+
+    @GetMapping("/holding")
+    public List<HoldingStockResponse> getHoldingStock(@RequestParam Integer userId) {
+        return assetsStockService.getHoldingStock(userId);
+    }
+    
     
     
 }

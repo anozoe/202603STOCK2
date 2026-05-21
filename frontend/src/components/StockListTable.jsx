@@ -106,7 +106,7 @@ function StockListTable({
                     {item.stockName}
                   </Link>
                 </td>
-                <td>{marketLabel(item.market)}</td>
+                <td>{item.market}</td>
                 <td>{formatPrice(item.currentPrice)}</td>
                 <td className={getDiffClass(item.priceChange)}>
                   {renderSignedPrice(item.priceChange)}

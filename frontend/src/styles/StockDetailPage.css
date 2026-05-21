@@ -293,4 +293,22 @@
   .stock-detail-indicator-table td {
     font-size: 15px;
   }
+
+}
+
+.order-btn {
+ display: block;
+ margin: 0 auto 28px;
+ background: #e63946;
+ color: #fff;
+ border: none;
+ padding: 8px 28px;
+ font-size: 14px;
+ font-weight: bold;
+ cursor: pointer;
+ font-family: inherit;
+}
+
+.order-btn:hover {
+ background: #c92a3a;
 }

@@ -105,3 +105,95 @@
     padding-left: 0;
   }
 }
+
+.assets-card {
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  padding: 24px 32px;
+  margin: 16px 0;
+}
+
+/* 上段：中央寄せ */
+.assets-top {
+  text-align: center;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #eee;
+}
+
+.assets-label {
+  font-size: 12px;
+  color: #888;
+}
+
+.assets-total {
+  font-size: 32px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  margin-top: 4px;
+  color: #222;
+}
+
+.assets-pnl {
+  margin-top: 8px;
+  font-size: 14px;
+}
+
+.assets-pnl-label {
+  color: #555;
+  margin-right: 8px;
+}
+
+.assets-pnl-value.stock-detail-plus {
+  color: #e63946;
+  font-weight: 600;
+}
+
+.assets-pnl-value.stock-detail-minus {
+  color: #2a9d8f;
+  font-weight: 600;
+}
+
+/* 下段：左右に配置 */
+.assets-bottom {
+  display: flex;
+  padding-top: 20px;
+}
+
+.assets-bottom-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+/* 右側のアイテムは右寄せ */
+.assets-bottom-item-right {
+  align-items: flex-end;
+}
+
+.assets-bottom-value {
+  font-size: 18px;
+  font-weight: 600;
+  color: #222;
+}
+
+.assets-bottom-row {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.assets-add-button {
+  background: none;
+  border: none;
+  color: #1976d2;
+  cursor: pointer;
+  font-size: 13px;
+  padding: 0;
+  text-decoration: none;
+}
+
+.assets-add-button:hover {
+  text-decoration: underline;
+}

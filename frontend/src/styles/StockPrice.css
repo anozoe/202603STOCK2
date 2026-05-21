@@ -1,58 +1,72 @@
+/* ============================================================
+   Stock Detail Summary — minimal plain-text style
+   (font-family is inherited from the page)
+   ============================================================ */
+
 .stock-detail-summary {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  padding: 12px 16px;
   font-size: 14px;
-  background: #fff;
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
+  line-height: 1.75;
+  color: #1a1a1a;
 }
 
+/* each row is just a line of text — keep defaults */
 .stock-detail-line {
-  display: flex;
-  align-items: baseline;
+  display: block;
 }
 
-.stock-detail-line .label {
-  color: #4b5563;
-  min-width: 9em;
-  flex-shrink: 0;
-}
-
+.stock-detail-line .label,
 .stock-detail-line .value {
-  color: #111827;
+  display: inline;
 }
 
-/* 銘柄名は強調 */
-.stock-detail-name-line .value {
+/* ---- 銘柄名 row: bold ---- */
+.stock-detail-name-line {
   font-weight: 700;
-  font-size: 16px;
 }
 
-/* 前日比の色 */
-.price-up {
-  color: #16a34a;   /* 緑 */
-  font-weight: 600;
+/* ---- 現在値 (4th row): prepend $ ---- */
+.stock-detail-line:nth-of-type(4) .value::before {
+  content: '$';
 }
 
-.price-down {
-  color: #dc2626;   /* 赤 */
-  font-weight: 600;
+/* ---- price change colors (Japanese convention) ---- */
+/* up = red */
+.stock-detail-plus {
+  color: #d8262a;
+}
+.stock-detail-plus::before {
+  content: '▲';
+  font-size: 0.8em;
+  margin-right: 3px;
+  vertical-align: 1px;
 }
 
-.price-flat {
-  color: #4b5563;
+/* down = green */
+.stock-detail-minus {
+  color: #1b8e3d;
+}
+.stock-detail-minus::before {
+  content: '▼';
+  font-size: 0.8em;
+  margin-right: 3px;
+  vertical-align: 1px;
 }
 
-/* 状態表示 */
-.stock-detail-loading,
-.stock-detail-error {
-  padding: 16px;
-  color: #6b7280;
+/* ---- loading / error ---- */
+.stock-detail-loading {
   font-size: 14px;
+  color: #888;
 }
 
 .stock-detail-error {
-  color: #dc2626;
+  font-size: 14px;
+  color: #d8262a;
+}
+
+.stock-detail-line:nth-of-type(5) .value:not(.stock-detail-plus):not(.stock-detail-minus) {
+  font-size: 0;
+}
+.stock-detail-line:nth-of-type(5) .value:not(.stock-detail-plus):not(.stock-detail-minus)::before {
+  content: '$0（0%）';
+  font-size: 14px;
 }

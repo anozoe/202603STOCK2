@@ -8,6 +8,7 @@ import { fetchMarketsDetail } from '../api/MarketsApi';
 import { getLoginUserId } from '../utils/authHeader';
 import { fetchAssetsStock, fetchAssetTotal, fetchStockAmount } from '../api/AssetsApi';
 import { OrderContext } from '../OrderContext';
+import { getErrorMessage } from "../utils/errorUtil";
 
 
 function OrderPage() {
@@ -19,6 +20,8 @@ function OrderPage() {
     const [assetsStockData, setAssetsStockData] = useState(null);
     const [stockAmountData, setStockAmountData] = useState(null);
     const [message, setMessage] = useState('');
+    const [error, setError] = useState(null);
+    const [error_message, setErrorMessage] = useState("");
 
     const userId = getLoginUserId();
 
@@ -100,7 +103,21 @@ function OrderPage() {
     const holdingAmount = stockAmountData?.sumHoldingAmount ?? 0;
     const isSellDisabled = holdingAmount <= 0;
 
+    function formatUSD(value) {
+    const num = Number(value);
+    if (!Number.isFinite(num) || num < 0) return "0.00";
+    return num.toLocaleString("en-US", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+    });
+    }
+    
     const handleOrderCheck = () => {
+        /*const errorMsg = validate();
+        if (errorMsg) {
+            alert(errorMsg);
+            return;
+        }*/
         const newOrder = {
             stockId: data.id,
             tickerCode,
@@ -118,11 +135,39 @@ function OrderPage() {
         setOrder(newOrder);
         navigate('/order/check');
     }
+
+    function handleBack() {
+    if (location.state?.fromPath) {
+        navigate(location.state.fromPath);
+        return;
+    }
+    if (location.state?.from) {
+        navigate(location.state.from);
+        return;
+    }
+    navigate(-1);
+    }
+    /*const validate = () => {
+        const newError = "";
+        let isValid = true;
+
+        if (!quantity) {
+           newError = getErrorMessage("E014", "数量");
+           isValid = false;
+        }
+
+        alert(newError);
+        return;
+
+
+    }*/
     
   return (
     <div>
         <Header />
-        <button> {/* TODO: 戻るボタンの遷移先作成 */}
+        <button
+            onClick={handleBack}
+        > 
          ↵戻る  
 
         </button>
@@ -208,7 +253,7 @@ function OrderPage() {
                                 </div>
                                 <div className='buyingPowerAfterOrder'>
                                     <div>注文後の買付可能額</div>
-                                    <div>${buyingPowerAfterOrder<0 ? 0 : buyingPowerAfterOrder}</div>
+                                    <div>${formatUSD(buyingPowerAfterOrder)}</div>
                                 </div>
                             </div>
                             <button 
@@ -280,7 +325,7 @@ function OrderPage() {
                                 </div>
                                 <div className='buyingPowerAfterOrder'>
                                     <div>注文後の買付可能額</div>
-                                    <div>${buyingPowerAfterOrder<0 ? 0 : buyingPowerAfterOrder}</div>
+                                    <div>${formatUSD(buyingPowerAfterOrder)}</div>
                                 </div>
                             </div>
                             <button 
@@ -293,7 +338,7 @@ function OrderPage() {
                     )}
                 </div>                   
             </div>
-            <div className='orderBook'>板情報コンポーネント</div>
+            {/*<div className='orderBook'>板情報コンポーネント</div>*/}
         </div>
     </div>
 

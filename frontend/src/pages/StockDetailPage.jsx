@@ -3,6 +3,8 @@ import { useLocation, useNavigate, useParams } from "react-router-dom";
 import Header from "../components/Header";
 import { fetchStockDetail } from "../api/stockApi";
 import "../styles/StockDetailPage.css";
+import StockPrice from "../components/StockPrice";
+import { fetchMarketsDetail } from "../api/MarketsApi";
 
 function marketLabel(code) {
   const map = {
@@ -443,11 +445,13 @@ function StockDetailPage() {
   const location = useLocation();
 
   const [data, setData] = useState(null);
+  const [marketData, setMarketData] = useState(null);
   const [message, setMessage] = useState("");
   const [activeTab, setActiveTab] = useState("overview");
   const [chartType, setChartType] = useState("candle");
   const [period, setPeriod] = useState("week");
 
+  
   const loadDetail = useCallback(async () => {
     try {
       const res = await fetchStockDetail(tickerCode);
@@ -457,10 +461,25 @@ function StockDetailPage() {
       setMessage(error.message || "取得に失敗しました。");
     }
   }, [tickerCode]);
-
+  
   useEffect(() => {
     loadDetail();
   }, [loadDetail]);
+  
+  const loadMarketDetail = useCallback(async () => {
+    if (!tickerCode) return;
+    try {
+      const res = await fetchMarketsDetail(tickerCode);
+      setMarketData(res);
+      setMessage('');
+    } catch (error) {
+      setMessage(error.message || '取得に失敗しました。');
+    }
+  }, [tickerCode]);
+
+  useEffect(() => {
+    loadMarketDetail();
+  }, [loadMarketDetail]);
 
   function handleBack() {
     if (location.state?.fromPath) {
@@ -493,6 +512,14 @@ function StockDetailPage() {
   );
   const diffClass = getDiffClass(data.priceChange);
 
+  const handleOrderBtn = () => {
+    navigate(`/order/${data.tickerCode}`);
+  }
+
+  
+
+
+
   return (
     <div className="stock-detail-screen">
       <Header />
@@ -509,43 +536,16 @@ function StockDetailPage() {
         </button>
 
         <div className="stock-detail-summary">
-          <div className="stock-detail-line">
-            <strong>銘柄コード：</strong>
-            {data.tickerCode}
-          </div>
-          <div className="stock-detail-line stock-detail-name-line">
-            <strong>銘柄名：</strong>
-            {data.stockName}
-          </div>
-          <div className="stock-detail-line">
-            <strong>取引市場：</strong>
-            {marketLabel(data.market)}
-          </div>
-          <div className="stock-detail-line">
-            <strong>現在値：</strong>
-            {formatPriceWithDollar(data.currentPrice)}
-          </div>
-          <div className="stock-detail-line">
-            <strong>前日比（騰落率）：</strong>
-            <span className={diffClass}>
-              {Number(data.priceChange) > 0
-                ? "+"
-                : Number(data.priceChange) < 0
-                ? "-"
-                : ""}
-              {formatPriceWithDollar(Math.abs(Number(data.priceChange || 0)))}
-              {changeRate !== null
-                ? `（${
-                    changeRate > 0 ? "+" : changeRate < 0 ? "-" : ""
-                  }${formatPercent(Math.abs(changeRate))}）`
-                : ""}
-            </span>
-          </div>
-          <div className="stock-detail-line">
-            <strong>データ取得日：</strong>
-            {formatDateYYYYMMDD(data.fetchedAt)}
-          </div>
+          <StockPrice tickerCode={tickerCode}/>
         </div>
+        
+        <button
+          type="button"
+          className="order-btn"
+          onClick={handleOrderBtn}
+        >
+          注文
+        </button>
 
         <div className="stock-detail-tab-row">
           <button
@@ -574,16 +574,16 @@ function StockDetailPage() {
 
             <div className="stock-detail-ohlc-grid">
               <div className="stock-detail-ohlc-box">
-                始値 {formatPriceWithDollar(data.overview?.openPrice)}
+                始値 {formatPriceWithDollar(marketData.openPrice)}
               </div>
               <div className="stock-detail-ohlc-box">
-                高値 {formatPriceWithDollar(data.overview?.highPrice)}
+                高値 {formatPriceWithDollar(marketData.highPrice)}
               </div>
               <div className="stock-detail-ohlc-box">
-                安値 {formatPriceWithDollar(data.overview?.lowPrice)}
+                安値 {formatPriceWithDollar(marketData.lowPrice)}
               </div>
               <div className="stock-detail-ohlc-box">
-                終値 {formatPriceWithDollar(data.overview?.closePrice)}
+                終値 {formatPriceWithDollar(marketData.finishPrice)}
               </div>
             </div>
 

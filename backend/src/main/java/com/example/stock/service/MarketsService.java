@@ -23,6 +23,11 @@ public class MarketsService {
             market.getStockName(),
             market.getMarket(),
             market.getCurrentPrice(),
+            market.getPreviousClose(),
+            market.getOpenPrice(),
+            market.getHighPrice(),
+            market.getLowPrice(),
+            market.getFinishPrice(),
             market.getPriceChange(),
             market.getChangeRate(),
             market.getUpdatedAt()    

@@ -103,7 +103,7 @@ function StockListPage() {
           maxCount={stockData.maxFavoriteCount}
           items={filterdStockData}
           onToggleFavorite={handleToggleFavorite}
-          fromPath="/stocks"
+          fromPath="/mypage?tab=${activeTab}"
         />
 
         <Pagination

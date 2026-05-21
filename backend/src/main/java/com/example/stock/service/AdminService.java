@@ -36,6 +36,7 @@ public class AdminService {
     private final UserFavoriteRepository userFavoriteRepository;
     private final StockMarketSyncService stockMarketSyncService;
     private final StockPriceHistoryRepository stockPriceHistoryRepository;
+    private final MarketSyncService marketSyncService;
 
     @Transactional(readOnly = true)
     public AdminStockListResponse getStocks(int page, int size) {
@@ -76,6 +77,7 @@ public class AdminService {
         }
 
         stockMarketSyncService.syncByTicker(tickerCode, null);
+        marketSyncService.createMissingMarkets();
     }
 
     @Transactional
@@ -94,6 +96,7 @@ public class AdminService {
         }
 
         stockMarketSyncService.syncByTicker(tickerCode, existing.getDisplayOrder());
+        marketSyncService.createMissingMarkets(); 
     }
 
     @Transactional
@@ -103,6 +106,8 @@ public class AdminService {
 
         userFavoriteRepository.deleteByStockId(stock.getId());
         stockPriceHistoryRepository.deleteByStockId(stock.getId());
+        marketSyncService.deleteByStockId(stock.getId()); 
+
         stockRepository.delete(stock);
 
      normalizeDisplayOrder();

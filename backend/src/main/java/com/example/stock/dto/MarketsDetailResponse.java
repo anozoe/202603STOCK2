@@ -14,6 +14,11 @@ public class MarketsDetailResponse {
     private String stockName;
     private String market;
     private BigDecimal currentPrice;
+    private BigDecimal previousClose;
+    private BigDecimal openPrice;
+    private BigDecimal highPrice;
+    private BigDecimal lowPrice;
+    private BigDecimal finishPrice;
     private BigDecimal priceChange;
     private BigDecimal changeRate;
     private LocalDateTime updatedAt;

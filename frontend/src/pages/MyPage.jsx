@@ -11,8 +11,26 @@ import "../styles/MyPage.css";
 import UserNameField from "../components/UserNameField";
 import EmailField from "../components/EmailField";
 import Header from "../components/Header";
+import StockListPage from "./StockListPage";
+import StockList from "../components/StockList";
+import { getLoginUserId } from "../utils/authHeader";
+import { fetchAssetTotal, fetchHoldingStock } from "../api/AssetsApi";
+import '../styles/StockPrice.css'
+import { useSearchParams } from "react-router-dom";
+import HoldingStockTable from "../components/HoldingStockTable";
+import TotalAssetsChart from "../components/TotalChart";
+import { PieChart } from "recharts";
+import { SimplePieChart } from "../components/PieChart";
 
 const PAGE_SIZE = 20;
+
+function getDiffClass(value) {
+  const num = Number(value);
+  if (Number.isNaN(num)) return "";
+  if (num > 0) return "stock-detail-plus";
+  if (num < 0) return "stock-detail-minus";
+  return "";
+}
 
 function normalizeUserName(value) {
   return value.replace(/[\s　]+/g, "");
@@ -33,10 +51,29 @@ function validateEmail(value) {
   return "";
 }
 
+
 function MyPage() {
   const [mode, setMode] = useState("display");
   const [message, setMessage] = useState("");
   const [currentPage, setCurrentPage] = useState(0);
+  const [assetsTotalData, setAssetsTotalData] = useState(null);
+  const userId = getLoginUserId();
+
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [activeTab, setActiveTab] = useState(() => {
+    return sessionStorage.getItem("mypage_tab") || "home";
+  });
+
+  const handleTabChange = (tab) => {
+    setActiveTab(tab);
+    setSearchParams({ tab });
+    sessionStorage.setItem("mypage_tab", tab);
+  };
+
+  async function handleHomeTab() {
+    handleTabChange("home");
+    await initialize();
+  }
 
   const [userInfo, setUserInfo] = useState({ userName: "", email: "" });
   const [form, setForm] = useState({ userName: "", email: "" });
@@ -139,80 +176,135 @@ function MyPage() {
     }
   }
 
+  useEffect(() => {
+    const loadAssetsTotal = async () => {
+      if (!userId) return;
+      try {
+        const res = await fetchAssetTotal(userId);
+        console.log("-----------------");
+        console.log(res);
+        setAssetsTotalData(res);
+        setMessage('')
+      } catch (error) {
+        setMessage(error.message || '取得に失敗しました。');
+      }
+
+    };
+    loadAssetsTotal();
+  }, []);
+
+  const unrealizedPnl = assetsTotalData?.unrealizedPnl ?? 0;
+  const unrealizedPnlRatio = assetsTotalData?.unrealizedPnlRatio ?? 0;
+  const diffClass = getDiffClass(unrealizedPnl);
+
+  const [holdingStockData, setHoldingStockData] = useState([]);
+  useEffect(() => {
+    const loadHoldinStock = async () => {
+      if (!userId) return;
+      try {
+        const res = await fetchHoldingStock(userId);
+        console.log("-----------------");
+        console.log(res);
+        setHoldingStockData(res);
+        setMessage('')
+      } catch (error) {
+        setMessage(error.message || '取得に失敗しました。');
+      }
+
+    };
+    loadHoldinStock();
+  }, []);
+
   return (
     <div className="mypage-screen">
       <Header />
-
-      <div className="mypage-page">
-        {message && <div className="page-message">{message}</div>}
-
-        <div className="mypage-user-box">
-          {mode === "display" ? (
-            <>
-              <div className="mypage-display-row">
-                <div className="mypage-display-label">ユーザ名</div>
-                <div className="mypage-display-value">{userInfo.userName}</div>
-              </div>
-              <div className="mypage-display-row">
-                <div className="mypage-display-label">メールアドレス</div>
-                <div className="mypage-display-value">{userInfo.email}</div>
-              </div>
-              <div className="mypage-button-area">
-                <button
-                  type="button"
-                  className="mypage-button mypage-button-edit"
-                  onClick={() => {
-                    setMode("input");
-                    setErrors({ userName: "", email: "" });
-                    setMessage("");
-                  }}
-                >
-                  編集
-                </button>
-              </div>
-            </>
-          ) : (
-            <>
-              <UserNameField
-                ref={userNameRef}
-                value={form.userName}
-                onChange={(value) => setForm((prev) => ({ ...prev, userName: value }))}
-                placeholder="ユーザ名"
+      <div className="assets-card">
+        <div className="assets-top">
+          <div className="assets-label">総資産</div>
+          <div className="assets-total">${Number(assetsTotalData?.totalAssets ?? 0).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2, })}</div>
+          <div className="assets-pnl">
+            <span className="assets-pnl-label">評価損益</span>
+            <span className={`value ${diffClass}`}>
+              {unrealizedPnl > 0 ? "+$" : unrealizedPnl < 0 ? "-$" : "$"}{Math.abs(unrealizedPnl ?? 0)}
+              {unrealizedPnlRatio != null ? `（${unrealizedPnlRatio > 0 ? "+" : unrealizedPnlRatio < 0 ? "-" : ""}${Math.abs(unrealizedPnlRatio)}%）` : ''}
+            </span>
+          </div>
+        </div>
+        <div className="assets-bottom">
+          <div className="assets-bottom-item">
+            <div className="assets-label">保有資産評価額</div>
+            <div className="assets-bottom-value">${assetsTotalData?.holdingValue}</div>
+          </div>
+          <div className="assets-bottom-item">
+            <div className="assets-label">買付可能額</div>
+            <div className="assets-bottom-value">
+              <span className="assets-bottom-value">
+                ${assetsTotalData?.buyingPower}
+              </span>
+              <button type="button" className="assets-add-button">追加</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div className='tab-header'>
+          <button
+            className={`tab-button ${activeTab === 'home' ? 'active' : ''}`}
+            onClick={handleHomeTab}
+          >
+            ホーム
+          </button>
+          <button
+            className={`tab-button ${activeTab === 'list' ? 'active' : ''}`}
+            onClick={() => handleTabChange('list')}
+          >
+            銘柄一覧
+          </button>
+          <button
+            className={`tab-button ${activeTab === 'holding' ? 'active' : ''}`}
+            onClick={() => handleTabChange('holding')}
+          >
+            保有銘柄
+          </button>
+        </div>
+        <div>
+          {activeTab === 'home' && (
+            <div>
+              <StockListTable
+                title="お気に入り銘柄"
+                currentCount={favoriteData.currentFavoriteCount}
+                maxCount={favoriteData.maxFavoriteCount}
+                items={favoriteData.items}
+                onToggleFavorite={handleRemoveFavorite}
+                fromPath={`/mypage?tab=${activeTab}`}
               />
-              <EmailField
-                ref={emailRef}
-                value={form.email}
-                onChange={(value) => setForm((prev) => ({ ...prev, email: value }))}
-                placeholder="メールアドレス"
+
+              <Pagination
+                currentPage={currentPage}
+                totalCount={favoriteData.totalFavorites}
+                pageSize={PAGE_SIZE}
+                onPageChange={setCurrentPage}
               />
-              <div className="mypage-button-area">
-                <button
-                  type="button"
-                  className="mypage-button mypage-button-update"
-                  onClick={handleUpdate}
-                >
-                  更新
-                </button>
-              </div>
-            </>
+            </div>
+          )}
+          {activeTab === 'list' && (
+            <StockList fromPath={`/mypage?tab=${activeTab}`} />
+          )}
+          {activeTab === 'holding' && (
+            <div>
+              <HoldingStockTable
+                items={holdingStockData}
+                fromPath={`/mypage?tab=${activeTab}`}
+              />
+              <TotalAssetsChart
+                userId = {userId}
+              />
+              <SimplePieChart
+                items={holdingStockData}
+              />
+            </div>
           )}
         </div>
-
-        <StockListTable
-          title="お気に入り銘柄"
-          currentCount={favoriteData.currentFavoriteCount}
-          maxCount={favoriteData.maxFavoriteCount}
-          items={favoriteData.items}
-          onToggleFavorite={handleRemoveFavorite}
-          fromPath="/mypage"
-        />
-
-        <Pagination
-          currentPage={currentPage}
-          totalCount={favoriteData.totalFavorites}
-          pageSize={PAGE_SIZE}
-          onPageChange={setCurrentPage}
-        />
       </div>
     </div>
   );

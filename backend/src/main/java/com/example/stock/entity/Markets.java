@@ -20,6 +20,9 @@ public class Markets {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
+    @Column(name = "stock_id", nullable = false)
+    private Long stockId;
+
     @Column(name = "ticker_code", nullable = false, unique = true, length = 20)
     private String tickerCode;
 

@@ -96,7 +96,7 @@ public class ExecutionCheckService {
             target.setExecutedAt(LocalDateTime.now());
 
             saveOrders(target);
-            saveAssetsStock(target);
+            addAssetsStock(target);
             saveAssetsTotal(target);
 
             return true;
@@ -195,14 +195,17 @@ public class ExecutionCheckService {
     }
 
     // assets_stockテーブル保存
-    private void saveAssetsStock(ExecutionInfoResponse target){
-        AssetsStock assetsStock = assetsStockRepository.findByOrderId(target.getOrderId()).orElseThrow();
-        assetsStock.setAveragePrice(target.getAveragePrice());
+    private void addAssetsStock(ExecutionInfoResponse target){
+        AssetsStock assetsStock = new AssetsStock();
+        assetsStock.setUserId(target.getUserId());
+        assetsStock.setStockId(target.getStockId());
+        assetsStock.setOrderId(target.getOrderId());
+        assetsStock.setAveragePrice(target.getExecutedPrice());
         assetsStock.setProfitLoss(target.getProfitLoss());
         assetsStock.setProfitLossRatio(target.getProfitLossRatio());
         assetsStock.setMarketValue(target.getMarketValue());
         assetsStock.setHoldingAmount(target.getHoldingAmount());
-        assetsStock.setUpdatedAt(LocalDateTime.now());
+        assetsStock.setCreatedAt(LocalDateTime.now());
         assetsStockRepository.save(assetsStock);
     }
 

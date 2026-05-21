@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { fetchMarketsDetail } from '../api/MarketsApi';
-import '../styles/StockDetailPage.css';
+import '../styles/StockPrice.css';
 
 function getDiffClass(value) {
   const num = Number(value);
@@ -55,10 +55,10 @@ function StockPrice({ tickerCode }) {
       <div className="stock-detail-line">
         <span className="label">前日比（騰落率）：</span>
         <span className={`value ${diffClass}`}>
-          {data.priceChange > 0 ? "+$" : data.priceChange < 0 ? "-$" :""}{data.priceChange}
+          {data.priceChange > 0 ? "+$" : data.priceChange < 0 ? "-$" :""}{Math.abs(data.priceChange)}
           {data.changeRate ? `（${
                     data.changeRate > 0 ? "+" : data.changeRate < 0 ? "-" : ""
-                  }${data.changeRate}%）` : ''}
+                  }${Math.abs(data.changeRate)}%）` : ''}
         </span>
       </div>
       <div className="stock-detail-line">

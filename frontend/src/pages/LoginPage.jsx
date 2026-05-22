@@ -41,7 +41,7 @@ function LoginPage() {
       if (user.role === "管理者") {
         navigate("/admin");
       } else {
-        navigate("/mypage?tab=${activeTab}");
+        navigate("/mypage?tab=${home}");
       }
     } catch (error) {
       console.error(error);

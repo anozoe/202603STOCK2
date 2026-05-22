@@ -31,7 +31,7 @@ public class BatchSchedule {
     ){
             this.marketsSetupService = marketsSetupService;
             this.priceUpdateService = priceUpdateService;
-            this.executionCheckService = executionCheckService;
+            this.executionCheckService = executionCheckService;zx 
             this.marketCloseService = marketCloseService;
             this.assetsHistoryService = assetsHistoryService;
             this.assetsUpdateService = assetsUpdateService;
@@ -47,15 +47,17 @@ public class BatchSchedule {
     
     // @Scheduled(cron = "0 10/10 9 * * MON-FRI", zone = "Asia/Tokyo")
     // @Scheduled(cron = "0 0/10 10-16 * * MON-FRI", zone = "Asia/Tokyo")
-    // @Scheduled(cron = "0 0 17 * * MON-FRI", zone = "Asia/Tokyo")
-    @Scheduled(cron = "0 * * * * *", zone = "Asia/Tokyo")
     public void priceUpdate() {
         priceUpdateService.updateCurrentPrice();
         executionCheckService.executionCheck();
         assetsUpdateService.updateAssets();
     }
     
+    // @Scheduled(cron = "0 0 17 * * MON-FRI", zone = "Asia/Tokyo")
     public void marketClose(){
+        priceUpdateService.updateCurrentPrice();
+        executionCheckService.executionCheck();
+        assetsUpdateService.updateAssets();
         marketCloseService.setmarketClose();
         assetsHistoryService.addAssetsTotal();
     }

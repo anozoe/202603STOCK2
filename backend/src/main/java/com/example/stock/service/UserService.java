@@ -84,11 +84,12 @@ public class UserService {
         
         try {
             User registeredUser = userRepository.save(user);
-
+            BigDecimal defaultBuyingPower = BigDecimal.valueOf(100000);
             AssetsTotal assetsTotal = new AssetsTotal();
             assetsTotal.setUserId(registeredUser.getId().intValue());
+            assetsTotal.setBuyingPower(defaultBuyingPower);
             assetsTotal.setHoldingsValue(BigDecimal.ZERO);
-            assetsTotal.setTotalAssets(BigDecimal.ZERO);
+            assetsTotal.setTotalAssets(defaultBuyingPower);
             assetsTotal.setUnrealizedPnl(BigDecimal.ZERO);
             assetsTotal.setUnrealizedPnlRatio(BigDecimal.ZERO);
             assetsTotal.setCreatedAt(LocalDateTime.now());

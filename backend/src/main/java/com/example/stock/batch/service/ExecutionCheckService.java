@@ -70,11 +70,15 @@ public class ExecutionCheckService {
             BigDecimal profitLoss = BigDecimal.ZERO;        // 約定したとき損益は0になる
             BigDecimal profitLossRatio = BigDecimal.ZERO;   // 約定したとき損益は0になる
             BigDecimal marketValue = executedPrice.multiply(BigDecimal.valueOf(orderQuantity));
-            BigDecimal limitValue = limitPrice.multiply(BigDecimal.valueOf(orderQuantity));
-            BigDecimal differenceValue = limitValue.subtract(marketValue);
+            
 
             // assets_total
-            BigDecimal newBuyingPower = target.getBuyingPower().add(differenceValue);
+            // 買付可能額返金処理
+            BigDecimal ReservedBuyingPower = limitPrice.multiply(BigDecimal.valueOf(orderQuantity));
+            BigDecimal tradedAmount = executedPrice.multiply(BigDecimal.valueOf(orderQuantity));
+            BigDecimal refundBuyingPower = ReservedBuyingPower.subtract(tradedAmount);
+            BigDecimal newBuyingPower = target.getBuyingPower().add(refundBuyingPower);
+
             BigDecimal newHoldingValue = target.getHoldingsValue().add(marketValue);
             BigDecimal newTotalAssets = newBuyingPower.add(newHoldingValue);
             BigDecimal newUnrealizedPnl = target.getUnrealizedPnl().add(profitLoss);
